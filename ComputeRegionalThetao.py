@@ -1,31 +1,9 @@
-import numpy as np
-import pandas as pd
-import xarray as xr
+import basal_melt_calc as calc
 
-import func_data_variables_parameters as dvp
-import func_weighted_means as comp
-
-area_file = "area_file"
-file_thetao = "thetao_file"
-data_dir  = '/ESM_data/'
+# Define parameters
+path = "/net/pc200037/nobackup/users/linden/cmip6data/CMIP6/CMIP/EC-Earth-Consortium/EC-Earth3/historical/r1i1p1f1/" 
+area_file = path + "Ofx/areacello/gn/areacello_Ofx_EC-Earth3_historical_r1i1p1f1_gn.nc"
+thetao_file = path + "Omon/thetao/gn/thetao_Omon_EC-Earth3_historical_r1i1p1f1_gn_201401-201412.nc"
 sectors = ['eais','wedd','amun','ross','apen']
 
-# Open thetao dataset
-ds = xr.open_dataset(file_thetao)
-ds_year = ds.groupby('time.year').mean('time') #Compute annual mean
-ds.close()
-
-# Loop over oceanic sectors
-for sector in sectors:
-
-    print(sector)
-    area_ds = xr.open_dataset(area_file)
-
-    # Compute area weighted mean
-    print('Computing area weighted mean of thetao for ', sector, 'sector')           
-    thetao_area_weighted_mean = comp.area_weighted_mean(ds_year["thetao"],area_ds,sector)
-    thetao_volume_weighted_mean = comp.lev_weighted_mean(thetao_area_weighted_mean, ds_year.lev_bnds.mean("year").copy(),sector)
-    print(thetao_volume_weighted_mean)
-
-    ds_year.close()
-    area_ds.close()
+df = calc.weighted_mean_df(area_file, thetao_file, sectors)

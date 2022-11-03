@@ -24,6 +24,7 @@ def area_weighted_mean(ds_var,ds_area,sector):
     #print('Computing area weighted mean')
     area_weighted_mean = area_weighted.mean((lat,lon))
     return area_weighted_mean #2D field: time,levs
+    
 
 def lat_weighted_mean(ds_var,ds,sector):
     '''Compute latitude weighted mean oceanic temperature over specific oceanic sector

@@ -23,7 +23,7 @@ echo "INFILE = $INFILE"
 cp $INFILEBASE $INFILE
 
 n=coupled_bm
-bm=sb_ssp585_lev_2000.2d.hdf5
+bm=basal_melt.2d.hdf5
 
 count=$(find chk.* -maxdepth 1 -type f|wc -l)
 echo $count

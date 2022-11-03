@@ -67,11 +67,10 @@ amr.floating_ice_basal_flux_is_dhdt = true
 basalFlux.type = maskedFlux
 basalFlux.grounded.type = zeroFlux
 basalFlux.floating.type = LevelData
-basalFlux.floating.n = 100
-basalFlux.floating.timeStep = 1.0
+basalFlux.floating.n = 1
+basalFlux.floating.timeStep = 1.0e+10
 basalFlux.floating.startTime = 0.0
-basalFlux.floating.offset = 2015
-basalFlux.floating.fileFormat = ../bm_data/ssp585/shelfbasedepth/@BM_DATA
+basalFlux.floating.fileFormat = @BM_DATA
 basalFlux.floating.name = bm
 
 #calving model - hold the calving front steady

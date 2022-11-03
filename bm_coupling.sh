@@ -25,9 +25,3 @@ fi
 
 ### 4. Run BISICLES and stop once 1 plot file has been created
 sbatch bisicles_coupledbm.sh
-
-# 
-#        sed -i s/@GEO_FILE/$LPLOT/ $SH_BISICLES
-#        sed -i s/@C_FILE/$LPLOT/ $SH_BISICLES
-#        sed -i s/@MU_FILE/$LPLOT/ $SH_BISICLES
-#

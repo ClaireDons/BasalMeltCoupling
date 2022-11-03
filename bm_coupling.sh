@@ -1,5 +1,7 @@
 #!/bin/bash -l
 
+module load python3/3.8.8-01
+
 ### 1. Check for last plot file, if one exists, take most recent one and flatten to NetCDF, 
 ###    If no plot file then use time=0 values
 

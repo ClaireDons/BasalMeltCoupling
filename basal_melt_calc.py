@@ -58,7 +58,7 @@ def quadBasalMeltAnomalies(gamma, thetao, Tf , baseline):
     ms = gamma * 10**5 * c_quad
 
     # Quadratic melt baseline (negative if To < Tf)
-    BM_base = (baseline - Tf)*(abs(baseline) - Tf[:]) * ms
+    BM_base = (baseline - Tf)*(abs(baseline) - Tf) * ms
     # Compute basal melt timeseries
     BM = (thetao - Tf) * (abs(thetao) - Tf) * ms  
     # Compute basal melt anomalies

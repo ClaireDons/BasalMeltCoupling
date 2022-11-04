@@ -5,6 +5,7 @@ import xarray as xr
 import pandas as pd
 
 import basal_melt_calc as calc
+import weighted_means as comp
 
 # Define parameters
 path = "/net/pc200037/nobackup/users/linden/cmip6data/CMIP6/CMIP/EC-Earth-Consortium/EC-Earth3/historical/r1i1p1f1/" 
@@ -35,7 +36,7 @@ x = np.array(dat['x'])
 y = np.array(dat['y'])
 
 # Calculate volume weighted mean
-df = calc.weighted_mean_df(area_file, thetao_file, sectors)
+df = comp.weighted_mean_df(area_file, thetao_file, sectors)
 
 # Calculate basal melt
 df2 =  pd.DataFrame()

@@ -1,5 +1,6 @@
 import numpy as np
 import xarray as xr
+import pandas as pd
 
 import data_variables_parameters as dvp
 
@@ -109,3 +110,31 @@ def lev_weighted_mean(ds,lev_bnds,sector):
     
     # Return layer-weighted ocean temperature
     return levs_weighted_mean
+
+def weighted_mean_df(area_file, thetao_file, sectors):
+    """ Compute volume weighted mean for one year of thetao
+    Args:
+        area_file (str): file name for file containing areacello data
+        thetao_file (str): file name for file containing ocean data
+        sectors (list of str): list of sector names
+    Returns:
+        df (pandas dataframe): dataframe with volume weighted mean for each sector
+    """
+    # Open thetao dataset
+    ds = xr.open_dataset(thetao_file)
+    ds_year = ds.groupby('time.year').mean('time') #Compute annual mean
+    ds.close()
+    area_ds = xr.open_dataset(area_file)
+
+    # Loop over oceanic sectors
+    df = pd.DataFrame()
+    for sector in sectors:
+        # Compute area weighted mean
+        print('Computing area weighted mean of thetao for ', sector, 'sector')           
+        thetaoAWM = area_weighted_mean(ds_year["thetao"],area_ds,sector)
+        thetaoVWM = lev_weighted_mean(thetaoAWM, ds_year.lev_bnds.mean("year").copy(),sector)
+        df[sector] = thetaoVWM
+
+    ds_year.close()
+    area_ds.close()
+    return df

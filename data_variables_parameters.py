@@ -1,46 +1,42 @@
 import numpy as np
 
-def mask_sector(ds,sector,lat,lon):
-    '''select mask of sector'''
-    mask_eais = (
-        (ds.coords[lat] > -76)
-        & (ds.coords[lat] < -65)
-        & (ds.coords[lon] < 173)
-    ) + (
-        (ds.coords[lat] > -76)
-        & (ds.coords[lat] < -65)
-        & (ds.coords[lon] > 350) 
+def create_mask(ds,coords):
+    """ create a mask based on coordinates
+    Args:
+        ds (xarray dataset): thetao dataset
+        lat1,lat2,lon1,lon2 (int): coordinates of sector
+    Returns:
+        mask (): mask of sector
+    """
+    try:
+        lat='latitude'
+        lon='longitude'
+    except:
+        lat='lat'
+        lon='lon'
+
+    mask = ((ds.coords[lat] > coords[0])
+        & (ds.coords[lat] < coords[1])
+        & (ds.coords[lon] > coords[2])
+        & (ds.coords[lon] < coords[3])
     )
+    return mask
+
+
+def sel_mask(ds,sector):
+    '''select mask of sector
+    Args:
+        ds (xarray dataset): thetao dataset
+        sector (str): sector name
+    Returns:
+        mask (): mask of sector
+    '''
     
-    mask_wedd = (
-        (ds.coords[lat] < -72)
-        & (ds.coords[lon] > 295)
-        & (ds.coords[lon] < 350)
-    )
-    
-    mask_amun = (
-        (ds.coords[lat] < -70)
-        & (ds.coords[lon] > 210)
-        & (ds.coords[lon] < 295)
-    )
-    
-    mask_ross = (
-        (ds.coords[lat] < -76)
-        & (ds.coords[lon] > 150)
-        & (ds.coords[lon] < 210)
-    ) 
-    
-    mask_apen = (
-        (ds.coords[lat] > -70)
-        & (ds.coords[lat] < -65)
-        & (ds.coords[lon] > 294)
-        & (ds.coords[lon] < 310)
-    ) + (
-        (ds.coords[lat] > -75)
-        & (ds.coords[lat] < -70)
-        & (ds.coords[lon] > 285)
-        & (ds.coords[lon] < 295)
-    )
+    mask_eais = create_mask(ds,[-76,-65,0,173]) + create_mask(ds,[-76,-65,350,0])
+    mask_wedd = create_mask(ds,[-90,-72,295,350])
+    mask_amun = create_mask(ds,[-90,-70,210,295])
+    mask_ross = create_mask(ds,[-90,-76,150,210])
+    mask_apen = create_mask(ds,[-70,-65,294,310]) + create_mask(ds,[-75,-70,285,295])
     
     if sector == "eais":
         mask = mask_eais
@@ -57,21 +53,14 @@ def mask_sector(ds,sector,lat,lon):
     else: print("Sector does not exist in 'sel_mask'")
     return mask
 
-def sel_mask(ds, sector):
-    '''select coordinate names before selecting antarctic ocean sector'''
-    try: 
-        lat='latitude'
-        lon='longitude'
-        mask = mask_sector(ds,sector,lat,lon)
-    except:
-        lat='lat'
-        lon='lon'
-        mask = mask_sector(ds,sector,lat,lon) 
-    return mask
-
 
 def sel_depth_bnds(sector):
-    '''select oceanic layers based on shelf depth'''
+    '''select oceanic layers based on shelf depth
+    Args: 
+        sector (str): name of sector
+    Returns:
+        ocean_slice (): shelfbase slice which is dependent on sector
+    '''
     
     # Sector-specific depths (baesd on shelf base depth)
     if type(sector) == str:
@@ -95,3 +84,16 @@ def sel_depth_bnds(sector):
             ocean_slice = np.array([shelf_depth-150,shelf_depth+150])
       
     return ocean_slice
+
+
+    """
+        mask_eais = (
+        (ds.coords[lat] > -76)
+        & (ds.coords[lat] < -65)
+        & (ds.coords[lon] < 173)
+    ) + (
+        (ds.coords[lat] > -76)
+        & (ds.coords[lat] < -65)
+        & (ds.coords[lon] > 350) 
+    )
+    """

@@ -4,8 +4,6 @@ import pandas as pd
 
 import data_variables_parameters as dvp
 
-###############################################################################
-
 def area_weighted_mean(ds_var,ds_area,sector):
     '''Compute area weighted mean oceanic temperature over specific oceanic sector
     Args:
@@ -130,7 +128,7 @@ def weighted_mean_df(area_file, thetao_file, sectors):
     df = pd.DataFrame()
     for sector in sectors:
         # Compute area weighted mean
-        print('Computing area weighted mean of thetao for ', sector, 'sector')           
+        #print('Computing area weighted mean of thetao for ', sector, 'sector')           
         thetaoAWM = area_weighted_mean(ds_year["thetao"],area_ds,sector)
         thetaoVWM = lev_weighted_mean(thetaoAWM, ds_year.lev_bnds.mean("year").copy(),sector)
         df[sector] = thetaoVWM

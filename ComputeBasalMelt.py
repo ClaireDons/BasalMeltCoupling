@@ -6,6 +6,7 @@ import pandas as pd
 
 import basal_melt_calc as calc
 import weighted_means as comp
+import data_variables_parameters as dvp
 
 # Define parameters
 path = "/net/pc200037/nobackup/users/linden/cmip6data/CMIP6/CMIP/EC-Earth-Consortium/EC-Earth3/historical/r1i1p1f1/" 

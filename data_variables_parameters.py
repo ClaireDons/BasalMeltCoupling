@@ -23,7 +23,7 @@ def create_mask(ds,coords):
     return mask
 
 
-def sel_mask(ds,sector):
+def sector_masks(ds):
     '''select mask of sector
     Args:
         ds (xarray dataset): thetao dataset
@@ -31,27 +31,15 @@ def sel_mask(ds,sector):
     Returns:
         mask (): mask of sector
     '''
-    
+
     mask_eais = create_mask(ds,[-76,-65,0,173]) + create_mask(ds,[-76,-65,350,0])
     mask_wedd = create_mask(ds,[-90,-72,295,350])
     mask_amun = create_mask(ds,[-90,-70,210,295])
     mask_ross = create_mask(ds,[-90,-76,150,210])
     mask_apen = create_mask(ds,[-70,-65,294,310]) + create_mask(ds,[-75,-70,285,295])
-    
-    if sector == "eais":
-        mask = mask_eais
-    elif sector == "wedd":
-        mask = mask_wedd
-    elif sector == "amun":
-        mask = mask_amun
-    elif sector == "ross":
-        mask = mask_ross 
-    elif sector == 'apen':
-        mask = mask_apen #!use Amundsen sector
-    elif sector == "anta":
-        mask = mask_eais + mask_wedd + mask_amun + mask_ross + mask_apen
-    else: print("Sector does not exist in 'sel_mask'")
-    return mask
+    masks = {'eais': mask_eais, 'wedd': mask_wedd, 'amun': mask_amun, 'ross': mask_ross, 'apen': mask_apen}
+
+    return masks
 
 
 def sel_depth_bnds(sector):

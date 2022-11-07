@@ -84,7 +84,7 @@ def lev_weighted_mean(ds,lev_bnds,sector):
     depth_bnds_sector = dvp.sel_depth_bnds(sector)     
     depth_top = depth_bnds_sector[0]
     depth_bottom = depth_bnds_sector[1]
-    print(depth_bnds_sector)
+    #print(depth_bnds_sector)
     
     # Find oceanic layers covering the depth bounds and take a slice of these
     # layers

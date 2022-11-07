@@ -4,9 +4,8 @@ import os
 import xarray as xr
 import pandas as pd
 
-import basal_melt_calc as calc
 import weighted_means as comp
-import data_variables_parameters as dvp
+import BasalMelt as BM
 
 # Define parameters
 path = "/net/pc200037/nobackup/users/linden/cmip6data/CMIP6/CMIP/EC-Earth-Consortium/EC-Earth3/historical/r1i1p1f1/" 
@@ -43,7 +42,8 @@ df = comp.weighted_mean_df(area_file, thetao_file, sectors)
 df2 =  pd.DataFrame()
 for column in df:
     thetao = df[column].values
-    dBM = calc.quadBasalMeltAnomalies(gamma, thetao, Tf, baseline)
+    b = BM.BasalMelt(gamma, thetao)
+    dBM = b.quadBasalMeltAnomalies()
     df2[column]=dBM
 print(df2)
 

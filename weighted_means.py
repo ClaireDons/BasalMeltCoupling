@@ -2,7 +2,7 @@ import numpy as np
 import xarray as xr
 import pandas as pd
 
-import data_variables_parameters as dvp
+import AntarcticaSectors as AS
 
 def area_weighted_mean(ds_var,ds_area,mask):
     '''Compute area weighted mean oceanic temperature over specific oceanic sector
@@ -81,7 +81,7 @@ def lev_weighted_mean(ds,lev_bnds,sector):
     '''
    
     # Select depth bounds of sector
-    depth_bnds_sector = dvp.sel_depth_bnds(sector)     
+    depth_bnds_sector = AS.ShelfBase(sector)     
     depth_top = depth_bnds_sector[0]
     depth_bottom = depth_bnds_sector[1]
     #print(depth_bnds_sector)
@@ -132,7 +132,9 @@ def weighted_mean_df(area_file, thetao_file, sectors):
     ds_year = ds.groupby('time.year').mean('time') #Compute annual mean
     ds.close()
     area_ds = xr.open_dataset(area_file)
-    masks = dvp.sector_masks(ds)
+    sec = AS.LevermannSectors(ds)
+    masks = sec.sector_masks()
+    #masks = dvp.sector_masks(ds)
 
     # Loop over oceanic sectors
     df = pd.DataFrame()

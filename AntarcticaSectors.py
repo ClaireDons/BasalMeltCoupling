@@ -11,6 +11,18 @@ class LevermannSectors:
     apen1 = [-70,-65,294,310]
     apen2 = [-75,-70,285,295]
 
+    # Sectors
+    sectors = ['eais','wedd','amun','ross','apen']
+
+    # Sector-specific depths (based on shelf base depth)
+    find_shelf_depth = {
+    'eais': 369,
+    'wedd': 420,
+    'amun': 305,
+    'ross': 312,
+    'apen': 420
+    }
+
     def __init__(self, ds):
         self.ds = ds
 
@@ -61,18 +73,6 @@ class LevermannSectors:
 
 
 class OceanData(LevermannSectors):
-
-    # Sectors
-    sectors = ['eais','wedd','amun','ross','apen']
-
-    # Sector-specific depths (based on shelf base depth)
-    find_shelf_depth = {
-    'eais': 369,
-    'wedd': 420,
-    'amun': 305,
-    'ross': 312,
-    'apen': 420
-    }
 
     def __init__(self,thetao,area):
         #super().__init__(self,ds)

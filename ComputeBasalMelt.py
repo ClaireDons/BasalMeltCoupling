@@ -1,12 +1,4 @@
-import numpy as np
-from glob import glob
-import os
-import xarray as xr
-import pandas as pd
-
-#import weighted_means as comp
 import BasalMelt as BM
-import AntarcticaSectors as AS
 
 # Define parameters
 path = "/net/pc200037/nobackup/users/linden/cmip6data/CMIP6/CMIP/EC-Earth-Consortium/EC-Earth3/historical/r1i1p1f1/" 
@@ -23,15 +15,10 @@ nc_out = gen_path + 'BasalMeltCoupling/'
 # Load leverman masks (Maybe in future should just be replaces with coordinates)
 driver = '/usr/people/donnelly/bisicles/BISICLES/code/filetools/nctoamr2d.Linux.64.g++.gfortran.DEBUG.ex' # nc to amr hdf5 tool 
 
-# Calculate volume weighted mean
-OceanTemp = AS.OceanData(thetao_file,area_file)
-df = OceanTemp.weighted_mean_df()
-
 # Calculate basal melt
-b = BM.BasalMelt(gamma)
-df2 = b.thetao2basalmelt(df)
-print(df2)
+OceanTemp = BM.OceanData(thetao_file,area_file,gamma)
+melt = OceanTemp.thetao2basalmelt()
 
 # Open ncfiles and create masks for BISICLES
 Levermann = BM.LevermannMask(mask_path,nc_out,driver)
-Levermann.map2amr(name,df2)
+Levermann.map2amr(name,melt)

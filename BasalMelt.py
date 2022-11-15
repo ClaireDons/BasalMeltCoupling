@@ -279,9 +279,9 @@ class LevermannMask(OceanData):
         self.driver = driver
         
     def OpenMasks(self):
-        self.nc_files = glob(os.path.join(self.mask_path, "*.2d.nc"))
+        nc_files = glob(os.path.join(self.mask_path, "*.2d.nc"))
         bisicles_masks = {}
-        for file in self.nc_files:
+        for file in nc_files:
             key = os.path.splitext(os.path.basename(file))[0][15:-3]
             name = 'smask' + str(key)
             dat = xr.open_dataset(file)

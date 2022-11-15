@@ -7,6 +7,9 @@ module load openmpi/4.1.1.1
 module load hdf5-parallel/1.10.6
 module load netcdf4-parallel/4.7.4
 
+export PYTHONPATH=`pwd`
+export LD_LIBRARY_PATH=$HDF5_PARALLEL_DIR/lib:$PYTHON3_DIR/lib:$LD_LIBRARY_PATH
+
 ### 1. Check for last plot file, if one exists, take most recent one and flatten to NetCDF, 
 ###    If no plot file then use time=0 values
 

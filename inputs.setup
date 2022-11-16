@@ -1,6 +1,6 @@
 #main.poutBaseName = pout.@NAME
-amr.plot_prefix = plot.@NAME.
-amr.check_prefix = chk.@NAME.
+amr.plot_prefix = plots/plot.@NAME.
+amr.check_prefix = checkpoints/chk.@NAME.
 
 
 #domain details

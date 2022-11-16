@@ -24,8 +24,9 @@ cp $INFILEBASE $INFILE
 
 n=coupled_bm
 bm=basal_melt.2d.hdf5
+checkpoints=/ec/res4/scratch/nlcd/CMIP6/bm_coupling/checkpoints
 
-count=$(find chk.* -maxdepth 1 -type f|wc -l)
+count=$(find checkpoints/chk.* -maxdepth 1 -type f|wc -l)
 echo $count
 let count=count+1 # Increase by one, for the next file number
 echo $count
@@ -39,9 +40,9 @@ export LD_LIBRARY_PATH=$HDF5_PARALLEL_DIR/lib:$PYTHON3_DIR/lib:$LD_LIBRARY_PATH
 export CH_OUTPUT_INTERVAL=0
 
  # work out what the latest checkpoint file is (if it exists)
-if test -n "$(find -type f -name "chk.$n.??????.2d.hdf5" -print -quit)"
+if test -n "$(find $checkpoints -type f -name "checkpoints/chk.$n.??????.2d.hdf5" -print -quit)"
     then
-    LCHK=`ls -th chk.$n.??????.2d.hdf5 | head -n 1`
+    LCHK=`ls -th checkpoints/chk.$n.??????.2d.hdf5 | head -n 1`
     echo "" >> $INFILE #ensure line break
     echo "amr.restart_file=$LCHK" >> $INFILE
     echo "amr.restart_set_time=false" >> $INFILE

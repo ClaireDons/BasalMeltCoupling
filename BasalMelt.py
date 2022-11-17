@@ -70,38 +70,23 @@ class LevermannSectors:
         'amun': mask_amun, 'ross': mask_ross, 'apen': mask_apen}
 
         return masks
+
+
+    def sector_sel(self,ds_var,mask):
+        ds_sel = ds_var.where(mask)
+        return ds_sel
     pass
 
 
 class OceanData(LevermannSectors):
-    # Parameters to compute basal ice shelf melt (Favier 2019)
-    rho_i = 917. #ice density kg m-3
-    rho_sw = 1028. # sea water density
-    c_po = 3974. # specific heat capacity of ocean mixed layer J kg-1 K-1
-    L_i = 3.34*10**5 # latent heat of fusion of ice
-    Tf = -1.6
-    baseline = 1
 
     def __init__(self,thetao,area,gamma):
         self.thetao = thetao
         self.area = area
         self.gamma = gamma
 
-    def ShelfBase(self, sector):
-        '''select oceanic layers based on shelf depth
-        Args: 
-            sector (str): name of sector
-        Returns:
-            ocean_slice (): shelfbase slice which is dependent on sector
-        '''
 
-        shelf_depth = self.find_shelf_depth[sector]
-        ocean_slice = np.array([shelf_depth-50,shelf_depth+50])
-        
-        return ocean_slice
-
-
-    def area_weighted_mean(self, ds_var,ds_area,mask):
+    def area_weighted_mean(self, ds_sel,ds_area):
         '''Compute area weighted mean oceanic temperature over specific oceanic sector
         Args:
             ds_var (xarray dataset): thetao dataset
@@ -111,10 +96,10 @@ class OceanData(LevermannSectors):
             area_weighted_mean (dataarray): area weighted mean of thetao
         '''
 
-        area_weights = ds_area.areacello
-        area_weighted = ds_var.where(mask).weighted(area_weights.fillna(0)) #DataArrayWeighted with weights along dimensions: j, i
-        lat = ds_var.dims[2]
-        lon = ds_var.dims[3]
+        area_weights = ds_area.areacello.fillna(0)
+        area_weighted = ds_sel.weighted(area_weights)
+        lat = ds_sel.dims[2]
+        lon = ds_sel.dims[3]
         
         try: 
             ((lat=='y') or (lat=='j') or (lat=='lat') or (lat=='latitude')) and ((lon=='x') or (lon=='i') or (lon=='lon') or (lon =='longitude'))
@@ -122,8 +107,8 @@ class OceanData(LevermannSectors):
             print("Check if these dimensions are correct to compute weighted mean")
 
         area_weighted_mean = area_weighted.mean((lat,lon))
+
         return area_weighted_mean #2D field: time,levs
-        
 
     def nearest_mask(self, diff):
         """Mask the values outside of target
@@ -134,9 +119,8 @@ class OceanData(LevermannSectors):
         """
         mask = np.ma.less_equal(diff, 0)
         if np.all(mask):
-            return None # returns None if target is greater than any value
+            return None
         masked_diff = np.ma.masked_array(diff, mask)
-        # Returns the index of the minimum value
         return masked_diff
 
 
@@ -165,8 +149,7 @@ class OceanData(LevermannSectors):
         masked_diff = self.nearest_mask(diff)
         return masked_diff.argmin()
 
-
-    def lev_weighted_mean(self, ds,lev_bnds,sector):
+    def lev_weighted_mean(self, ds,lev_bnds, top, bottom):
         '''Compute volume or depth weighted mean oceanic temperature over specific oceanic
         sector and specific depth layers (centered around ice shelf depth)
         Args:
@@ -176,23 +159,17 @@ class OceanData(LevermannSectors):
         Returns:
             levs_weighted_means (float): volume weighted mean of ocean temperature
         '''
-    
-        # Select depth bounds of sector
-        depth_bnds_sector = self.ShelfBase(sector)     
-        depth_top = depth_bnds_sector[0]
-        depth_bottom = depth_bnds_sector[1]
-        #print(depth_bnds_sector)
-        
+
         # Find oceanic layers covering the depth bounds and take a slice of these
         # layers
-        lev_ind_bottom= self.nearest_above(lev_bnds[:,1],depth_bottom)
-        lev_ind_top = self.nearest_below(lev_bnds[:,0],depth_top)
+        lev_ind_bottom= self.nearest_above(lev_bnds[:,1],bottom)
+        lev_ind_top = self.nearest_below(lev_bnds[:,0],top)
         levs_slice = ds.isel(lev=slice(lev_ind_top,lev_ind_bottom+1))
         
         # Create weights for each oceanic layer, correcting for layers that fall only partly within specified depth range 
         lev_bnds_sel = lev_bnds.values[lev_ind_top:lev_ind_bottom+1]
-        lev_bnds_sel[lev_bnds_sel > depth_bottom] = depth_bottom
-        lev_bnds_sel[lev_bnds_sel < depth_top] = depth_top
+        lev_bnds_sel[lev_bnds_sel > bottom] = bottom
+        lev_bnds_sel[lev_bnds_sel < top] = top
         # Weight equals thickness of each layer
         levs_weights = lev_bnds_sel[:,1]-lev_bnds_sel[:,0] 
         # DataArray required to apply .weighted on DataArray
@@ -205,14 +182,40 @@ class OceanData(LevermannSectors):
         
         # Return layer-weighted ocean temperature
         return levs_weighted_mean
+
+
+    def ShelfBase(self, sector):
+        '''select oceanic layers based on shelf depth
+        Args: 
+            sector (str): name of sector
+        Returns:
+            ocean_slice (): shelfbase slice which is dependent on sector
+        '''
+
+        shelf_depth = self.find_shelf_depth[sector]
+        ocean_slice = np.array([shelf_depth-50,shelf_depth+50])
+        
+        return ocean_slice
+
+    
+    def select_depth_range(self,sector):
+        # Select depth bounds of sector
+        depth_bnds_sector = self.ShelfBase(sector)     
+        top = depth_bnds_sector[0]
+        bottom = depth_bnds_sector[1]
+        return top, bottom
     
 
-    def weighted_mean(self, masks, sector, ds_year, area_ds):
-        mask = masks[sector]
-        # Compute area weighted mean     
-        thetaoAWM = self.area_weighted_mean(ds_year["thetao"],area_ds,mask)
-        thetaoVWM = self.lev_weighted_mean(thetaoAWM, ds_year.lev_bnds.mean("year").copy(),sector)
-        return thetaoVWM
+    def sector_lev_mean(self, ds, lev_bnds, sector):
+        top, bottom = self.select_depth_range(sector)
+        lev_weighted_mean = self.lev_weighted_mean(ds,lev_bnds,top,bottom)
+        return lev_weighted_mean
+
+
+    def sector_area_mean(self,ds_var,mask, ds_area):
+        ds_sel = self.sector_sel(ds_var,mask)
+        area_weighted_mean = self.area_weighted_mean(ds_sel, ds_area)
+        return area_weighted_mean
 
 
     def weighted_mean_df(self):
@@ -235,44 +238,59 @@ class OceanData(LevermannSectors):
         # Loop over oceanic sectors
         df = pd.DataFrame()
         for sector in self.sectors:
-            thetaoVWM = self.weighted_mean(masks,sector,ds_year,area_ds)
+            mask = masks[sector]
+            thetaoAWM = self.sector_area_mean(ds_year["thetao"], mask, area_ds)
+            thetaoVWM = self.sector_lev_mean(thetaoAWM, ds_year.lev_bnds.mean("year").copy(), sector)
             df[sector] = thetaoVWM
 
         ds_year.close()
         area_ds.close()
         return df
+    pass
 
+class BasalMelt(OceanData):
+    # Parameters to compute basal ice shelf melt (Favier 2019)
+    rho_i = 917. #ice density kg m-3
+    rho_sw = 1028. # sea water density
+    c_po = 3974. # specific heat capacity of ocean mixed layer J kg-1 K-1
+    L_i = 3.34*10**5 # latent heat of fusion of ice
+    Tf = -1.6
+    baseline = 1
 
-    def calc_cquad(self):
+    def quad_constant(self):
         c_lin = (self.rho_sw*self.c_po)/(self.rho_i*self.L_i)
         c_quad = (c_lin)**2
-        return c_quad
-
-
-    def quadBasalMeltAnomalies(self, thetao):
-        ## Compute quadratic basal melt anomalies with gamma
-        c_quad = self.calc_cquad()
         ms = self.gamma * 10**5 * c_quad # Quadratic constant
-        # Quadratic melt baseline (negative if To < Tf)
-        BM_base = (self.baseline - self.Tf)*(abs(self.baseline) - self.Tf) * ms
-        # Compute basal melt
-        BM = (thetao - self.Tf) * (abs(thetao) - self.Tf) * ms  
-        # Compute basal melt anomalies
+        return ms
+
+
+    def quadBasalMelt(self,dat):
+        ms = self.quad_constant()
+        bm = (dat - self.Tf)*(abs(dat)-self.Tf) * ms
+        return bm
+
+
+    def BasalMeltAnomalies(self, thetao):
+        BM_base = self.quadBasalMelt(self.baseline)
+        BM = self.quadBasalMelt(thetao) 
         dBM = BM - BM_base
         return dBM
 
+
     def thetao2basalmelt(self):
-        df = self.weighted_mean_df()
+        ocean = OceanData(self.thetao,self.area,self.gamma)
+        df = ocean.weighted_mean_df()
         df2 =  pd.DataFrame()
         for column in df:
             thetao = df[column].values
-            dBM = self.quadBasalMeltAnomalies(thetao)
+            dBM = self.BasalMeltAnomalies(thetao)
             df2[column]=dBM
+        print(df2)
         return df2
     pass
 
 
-class LevermannMask(OceanData):
+class LevermannMask(BasalMelt):
     def __init__(self,mask_path,nc_out,driver):
         self.mask_path = mask_path
         self.nc_out = nc_out
@@ -291,8 +309,10 @@ class LevermannMask(OceanData):
         y = np.array(dat['y'])
         return x,y,bisicles_masks
 
+
     def map2amr(self,name,df2):
         x,y,bisicles_masks = self.OpenMasks()
+        #bm = BasalMelt()
         #df2 = self.thetao2basalmelt()
         for i, row in df2.iterrows():
             new_mask = np.where(bisicles_masks['smask1'] == 1, row.apen, bisicles_masks['smask1'])

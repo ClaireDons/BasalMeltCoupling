@@ -24,7 +24,7 @@ cp $INFILEBASE $INFILE
 
 n=coupled_bm
 checkpoints=/ec/res4/scratch/nlcd/CMIP6/bm_coupling/checkpoints
-bm=@melt
+bm=basal_melt.2d.hdf5
 
 count=$(find checkpoints/chk.* -maxdepth 1 -type f|wc -l)
 echo $count

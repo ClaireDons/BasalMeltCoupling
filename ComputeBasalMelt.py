@@ -15,8 +15,9 @@ nc_out = path
 driver = '/perm/nlcd/bisicles/BISICLES/code/filetools/nctoamr2d.Linux.64.mpiCC.gfortran.DEBUG.MPI.ex' # nc to amr hdf5 tool 
 
 # Calculate basal melt
-OceanTemp = BM.OceanData(thetao_file,area_file,gamma)
+OceanTemp = BM.BasalMelt(thetao_file,area_file,gamma)
 melt = OceanTemp.thetao2basalmelt()
+
 
 # Open ncfiles and create masks for BISICLES
 Levermann = BM.LevermannMask(mask_path,nc_out,driver)

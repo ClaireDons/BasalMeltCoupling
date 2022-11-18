@@ -29,8 +29,8 @@ if test -n "$(find $plots -type f -name "plot.$n.??????.2d.hdf5" -print -quit)"
     echo "$NC_PLOT"
 fi
 
-### 2. Run basal melt python script
-python3 ComputeBasalMelt.py
+### 2. Run basal melt python script    
+python3 ComputeBasalMelt.py ${num} || exit
 
 ### 3. Define new basal melt values in input file
 export COUPLED=coupled_submission.sh

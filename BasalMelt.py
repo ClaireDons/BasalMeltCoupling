@@ -69,6 +69,8 @@ class LevermannSectors:
         masks = {'eais': mask_eais, 'wedd': mask_wedd,  
         'amun': mask_amun, 'ross': mask_ross, 'apen': mask_apen}
 
+        assert len(masks) == 5, "There should be 5 regions"
+
         return masks
 
 
@@ -274,6 +276,8 @@ class BasalMelt(OceanData):
         BM_base = self.quadBasalMelt(self.baseline)
         BM = self.quadBasalMelt(thetao) 
         dBM = BM - BM_base
+        assert dBM < 100, "Basal melt too unrealistic"
+        assert dBM > -100, "Basal melt too unrealistic"
         return dBM
 
 
@@ -285,6 +289,7 @@ class BasalMelt(OceanData):
             thetao = df[column].values
             dBM = self.BasalMeltAnomalies(thetao)
             df2[column]=dBM
+        assert df2.empty == False, "Dataframe should not be empty"
         print(df2)
         return df2
     pass
@@ -304,6 +309,7 @@ class LevermannMask(BasalMelt):
             name = 'smask' + str(key)
             dat = xr.open_dataset(file)
             bisicles_masks[name] = np.array(dat['smask'])
+        assert len(bisicles_masks) != 0, "Dictionary should not be empty"
 
         x = np.array(dat['x'])
         y = np.array(dat['y'])

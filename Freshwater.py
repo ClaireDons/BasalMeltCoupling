@@ -3,6 +3,10 @@ import xarray as xr
 from glob import glob
 import os 
 import subprocess
+import bisiclesh5 as b5
+import pandas as pd
+import h5py
+from joblib import Parallel, delayed
 
 ### 1. Flatten file (Maybe I don't even need this step)
 
@@ -29,12 +33,6 @@ flattenAMR(path,files,flatten)
 
 
 ### 3. Compute integrated mean over all the variables, and create a df
-import bisiclesh5 as b5
-import numpy as np
-import pandas as pd
-import h5py
-from joblib import Parallel, delayed
-import multiprocessing
 
 
 def var_mean(var, level=0):

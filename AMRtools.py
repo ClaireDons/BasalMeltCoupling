@@ -1,12 +1,12 @@
-import numpy as np
-import xarray as xr
+import os
 from glob import glob
-import os 
+import numpy as np
 import subprocess
-import bisiclesh5 as b5
-import pandas as pd
-import h5py
 from joblib import Parallel, delayed
+import h5py
+import pandas as pd
+
+import bisiclesh5 as b5
 
 class AMRobject:
     def __init__(self,file):

@@ -3,6 +3,7 @@ from glob import glob
 import numpy as np
 import subprocess
 from joblib import Parallel, delayed
+import multiprocessing
 import h5py
 import pandas as pd
 
@@ -10,7 +11,21 @@ import bisiclesh5 as b5
 
 class AMRobject:
     def __init__(self,file):
-        self.file = file
+        self.file = file # file name
+
+
+    def find_name(self):
+        name = os.path.splitext(os.path.basename(self.file))[0]
+        assert len(name) > 0, "name is empty"
+        return name
+
+
+    def flatten(self,flatten):
+        name = self.find_name()
+        nc = name + '.nc'
+        flattenOutput = subprocess.Popen([flatten, self.file, nc, "0", "-3333500", "-3333500"], stdout=subprocess.PIPE)
+        # assess
+        flattenOutput.communicate()[0]
 
 
     def varmean(var, level=0):
@@ -38,13 +53,47 @@ class AMRobject:
         series = pd.Series(means, index = df.columns)
         t = var[0].time
         return series, t
+
+
+    def statsRun(self, driver):
+        '''Function to run the BISICLES stats module and returns the output as plain text.
+        path: path to driver
+        driver: driver name
+        file: plot file to be processed'''
+        
+        statsCommand = driver + ' ' + self.file + ' 918 1028 9.81 | grep time'
+        statsOutput = subprocess.check_output(statsCommand,shell=True)
+        statsOutput = statsOutput.decode('utf-8')
+        return statsOutput
+
+
+    def statsSeries(statsOutput, df):
+        '''Function to take the BISICLES stats module output and turn it into a pandas data series.
+        statsOutput: Output from the stats command
+        df: a dataframe with the columns for the variables defined'''
+        
+        stats = statsOutput.split()
+        data = [float(stats[2]),stats[5],stats[8],stats[11],stats[14],stats[17],stats[20]]
+        a_series = pd.Series(data, index = df.columns)
+        return a_series
+
+
+    def statsRetrieve(self, driver, df):
+        '''Function which calls the BISICLES stats module and returns a pandas data series
+        path: path to driver
+        driver: driver name
+        file: plot file to be processed
+        df: a dataframe with the columns for the variables defined'''
+        
+        statsOutput = self.statsRun(driver)
+        a_series= self.statsSeries(statsOutput, df)
+        return a_series
     pass
 
 
 class AMRtools(AMRobject):
-    def __init__(self, path, files):
+    def __init__(self, path):
         self.path = path
-        self.files = files
 
 
     def open_files(self):
@@ -52,32 +101,35 @@ class AMRtools(AMRobject):
         return files
 
 
-    def find_name(self,f):
-        name = os.path.splitext(os.path.basename(f))[0]
-        return name
-
-
     def flattenAMR(self,flatten):
-        for f in self.files:
-            name = self.find_name(self.path,f)
-            nc = self.path + '/' + name + '.nc'
-            flattenOutput = subprocess.Popen([flatten, f, nc, "0", "-3333500", "-3333500"], stdout=subprocess.PIPE)
-            print(flattenOutput)
+        files = self.open_files()
+        for f in files:
+            AMRobject.flatten(f,flatten)
+
+
+    def nc2AMR(self,nc2amr, var):
+        files = self.open_files()
+        for f in files:
+            name = AMRobject.find_name(f)
+            amr = self.path + '/' + name + '.2d.hdf5'
+            flattenOutput = subprocess.Popen([nc2amr, f, amr, var], stdout=subprocess.PIPE)
+            # assess
             output = flattenOutput.communicate()[0]
-        return output
+        return output        
 
-
-    def amr_meansdf(self):
+    def lev0means(self):
         '''For each file in directory of files in a timeseries, 
         get var names, mean and time, appending to sorted dataframe.
         input: files in directory
         output: pandas dataframe'''
-        names, n_components = AMRobject.get_varnames(self.files[0])
+
+        files = self.open_files()
+        names, n_components = AMRobject.get_varnames(files[0])
         df = pd.DataFrame(columns=names)
             
         res = Parallel(n_jobs=2)(delayed(AMRobject.get_varmeans)
                                                 (f, df, n_components)
-                                                for f in self.files) 
+                                                for f in files) 
         series = [i[0] for i in res]
         time = [i[1] for i in res]
         
@@ -86,4 +138,25 @@ class AMRtools(AMRobject):
         df = df.sort_values(by=['time'])
         df = df.reset_index(drop =True)
         return df
+
+
+    def stats(self, statsTool):
+        '''Function which runs the BISICLES stats module over multiple plot files in parallel
+        path: path to driver
+        driver: driver name
+        files: plot files to be processed'''
+        
+        files = self.open_files()
+        num_jobs = multiprocessing.cpu_count()
+        df = pd.DataFrame(columns = 
+                        ["time", "volumeAll", "volumeAbove", "groundedArea", 
+                        "floatingArea", "totalArea", "groundedPlusLand"])  
+        series_list = Parallel(n_jobs=num_jobs)(delayed(self.statsRetrieve)
+                                                (statsTool,i,df)
+                                                for i in files) 
+        df = df.append(series_list, ignore_index=True)
+        df = df.sort_values(by=['time'])
+        df = df.reset_index(drop =True)
+        return df
+
     pass

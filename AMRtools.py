@@ -11,7 +11,21 @@ import bisiclesh5 as b5
 
 class AMRobject:
     def __init__(self,file):
-        self.file = file
+        self.file = file # file name
+
+
+    def find_name(self):
+        name = os.path.splitext(os.path.basename(self.file))[0]
+        assert len(name) > 0, "name is empty"
+        return name
+
+
+    def flatten(self,flatten):
+        name = self.find_name()
+        nc = name + '.nc'
+        flattenOutput = subprocess.Popen([flatten, self.file, nc, "0", "-3333500", "-3333500"], stdout=subprocess.PIPE)
+        # assess
+        flattenOutput.communicate()[0]
 
 
     def varmean(var, level=0):
@@ -87,25 +101,16 @@ class AMRtools(AMRobject):
         return files
 
 
-    def find_name(f):
-        name = os.path.splitext(os.path.basename(f))[0]
-        return name
-
-
     def flattenAMR(self,flatten):
         files = self.open_files()
         for f in files:
-            name = self.find_name(f)
-            nc = self.path + '/' + name + '.nc'
-            flattenOutput = subprocess.Popen([flatten, f, nc, "0", "-3333500", "-3333500"], stdout=subprocess.PIPE)
-            # assess
-            output = flattenOutput.communicate()[0]
-        return output
+            AMRobject.flatten(f,flatten)
+
 
     def nc2AMR(self,nc2amr, var):
         files = self.open_files()
         for f in files:
-            name = self.find_name(f)
+            name = AMRobject.find_name(f)
             amr = self.path + '/' + name + '.2d.hdf5'
             flattenOutput = subprocess.Popen([nc2amr, f, amr, var], stdout=subprocess.PIPE)
             # assess

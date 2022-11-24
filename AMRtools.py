@@ -6,6 +6,7 @@ from joblib import Parallel, delayed
 import multiprocessing
 import h5py
 import pandas as pd
+import xarray as xr
 
 import bisiclesh5 as b5
 
@@ -19,15 +20,60 @@ class AMRfile:
         assert len(name) > 0, "name is empty"
         return name
 
+    def nc2amr(self, nc2amrtool, var):
+        name = self.find_name()
+        amr = name + '.2d.hdf5'
+        flattenOutput = subprocess.Popen([nc2amrtool, self.file, amr, var], stdout=subprocess.PIPE)
+        # assess
+        output = flattenOutput.communicate()[0]
+        return output
+
+
+class flatten(AMRfile):
+    def __init__(self, file):
+        self.file = file
 
     def flatten(self,flatten):
-        name = self.find_name()
+        name = AMRfile.find_name(self)
         nc = name + '.nc'
         flattenOutput = subprocess.Popen([flatten, self.file, nc, "0", "-3333500", "-3333500"], stdout=subprocess.PIPE)
         # assess
         flattenOutput.communicate()[0]
 
 
+    def open(self,flatten):
+        self.flatten(flatten)
+        name = AMRfile.find_name(self)
+        nc = name + ".nc"
+        dat = xr.open_dataset(nc)
+        #assess
+        return dat
+
+
+    def flattenMean(self,dat):
+        vars = []
+        means = []
+        for i in dat:
+            m = dat[i].mean().values
+            vars.append(i)
+            means.append(m)
+        df = pd.DataFrame(columns=vars)
+        series = pd.Series(means, index = df.columns)
+        df = df.append(series, ignore_index=True)
+        assert df.empty == False, "Dataframe should not be empty"
+        return df        
+
+    def flattenStats(self,flatten):
+        dat = self.open(flatten)
+        df = self.flattenMean(dat)
+        return df
+    pass  
+
+class h5amr:     
+    def __init__(self, file):
+        self.file = file
+    
+    
     def varmean(var, level=0):
         '''Calculate the mean value for each variable in bisicles file'''
         box_mean = [i.mean() for i in var.data[level]]
@@ -53,6 +99,10 @@ class AMRfile:
         series = pd.Series(means, index = df.columns)
         t = var[0].time
         return series, t
+
+class statstool:
+    def __init__(self, file):
+        self.file = file    
 
 
     def statsRun(self, driver, hdf5=""):
@@ -106,7 +156,7 @@ class AMRfile:
     pass
 
 
-class AMRfiles(AMRfile):
+class AMRfiles(flatten,statstool,h5amr):
     def __init__(self, path):
         self.path = path
 
@@ -119,18 +169,14 @@ class AMRfiles(AMRfile):
     def flattenAMR(self,flatten):
         files = self.get_files()
         for f in files:
-            AMRfile.flatten(f,flatten)
+            flatten.flatten(f,flatten)
 
 
-    def nc2AMR(self,nc2amr, var):
-        files = self.get_files()
-        for f in files:
-            name = AMRfile.find_name(f)
-            amr = self.path + '/' + name + '.2d.hdf5'
-            flattenOutput = subprocess.Popen([nc2amr, f, amr, var], stdout=subprocess.PIPE)
-            # assess
-            output = flattenOutput.communicate()[0]
-        return output        
+ #   def nc2AMR(self,nc2amrtool, var):
+ #       files = self.get_files()
+ #       for f in files:
+ #           
+ #       return output        
 
     def lev0means(self):
         '''For each file in directory of files in a timeseries, 
@@ -174,5 +220,4 @@ class AMRfiles(AMRfile):
         df = df.sort_values(by=['time'])
         df = df.reset_index(drop =True)
         return df
-
     pass

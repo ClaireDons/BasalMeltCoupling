@@ -1,5 +1,6 @@
 import Freshwater as FW
-from AMRtools import AMRfile as amr
+from AMRtools import flatten as flat
+from AMRtools import statstool as stats
 
 ### 1. Flatten file (Maybe I don't even need this step)
 ### 2. Pull 2 most recent files, if 2 files don't exist then end the process
@@ -32,14 +33,16 @@ statistics = filetoolsPath + filetoolStats
 file_path1 = "/nobackup/users/donnelly/Antarctica/ssp585/shelfbasedepth/plot.ssp585_shelfbase.004980.2d.hdf5"
 file_path2 = "/nobackup/users/donnelly/Antarctica/ssp585/shelfbasedepth/plot.ssp585_shelfbase.005040.2d.hdf5"
 
-file1 = FW.BISICLES(file_path1)
-file2 = FW.BISICLES(file_path2)
+file1 = flat(file_path1)
+file2 = flat(file_path2)
 df1 = file1.flattenStats(flatten)
 df2 = file2.flattenStats(flatten)
 print(df1)
 print(df2)
 
-file_1 = amr(file_path1)
-file_2 = amr(file_path2)
+file_1 = stats(file_path1)
+file_2 = stats(file_path2)
 df_1 = file_1.statsFile(statistics)
+df_2 = file_2.statsFile(statistics)
 print(df_1)
+print(df_2)

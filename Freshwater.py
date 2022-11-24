@@ -17,16 +17,7 @@ class BISICLES:
         return dat
 
 
-    def varMeans(dat):
-        means = {}
-        for i in dat:
-            mean = i.mean()
-            means[i] = mean
-        return means
-
-
-    def flattenStats(self,flatten):
-        dat = self.open(flatten)
+    def flattenMean(self,dat):
         vars = []
         means = []
         for i in dat:
@@ -37,6 +28,11 @@ class BISICLES:
         series = pd.Series(means, index = df.columns)
         df = df.append(series, ignore_index=True)
         assert df.empty == False, "Dataframe should not be empty"
+        return df        
+
+    def flattenStats(self,flatten):
+        dat = self.open(flatten)
+        df = self.flattenMean(dat)
         return df
 pass  
 

@@ -1,4 +1,4 @@
-import AMRtools as amr
+from AMRtools import AMRfile as amr
 import xarray as xr
 import pandas as pd
 
@@ -8,7 +8,7 @@ class BISICLES:
 
 
     def open(self,flatten):
-        amrobj = amr.AMRobject(self.file)
+        amrobj = amr(self.file)
         amrobj.flatten(flatten)
         name = amrobj.find_name()
         nc = name + ".nc"

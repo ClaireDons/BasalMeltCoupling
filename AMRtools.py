@@ -20,21 +20,22 @@ class AMRfile:
         assert len(name) > 0, "name is empty"
         return name
 
+
     def nc2amr(self, nc2amrtool, var):
         name = self.find_name()
         amr = name + '.2d.hdf5'
-        flattenOutput = subprocess.Popen([nc2amrtool, self.file, amr, var], stdout=subprocess.PIPE)
+        nc2amrOutput = subprocess.Popen([nc2amrtool, self.file, amr, var], stdout=subprocess.PIPE)
         # assess
-        output = flattenOutput.communicate()[0]
-        return output
+        nc2amrOutput.communicate()[0]
 
 
-class flatten(AMRfile):
+class flatten:
     def __init__(self, file):
         self.file = file
+        self.amrfile = AMRfile(file)
 
     def flatten(self,flatten):
-        name = AMRfile.find_name(self)
+        name = self.amrfile.find_name()
         nc = name + '.nc'
         flattenOutput = subprocess.Popen([flatten, self.file, nc, "0", "-3333500", "-3333500"], stdout=subprocess.PIPE)
         # assess
@@ -43,7 +44,7 @@ class flatten(AMRfile):
 
     def open(self,flatten):
         self.flatten(flatten)
-        name = AMRfile.find_name(self)
+        name = self.amrfile.find_name()
         nc = name + ".nc"
         dat = xr.open_dataset(nc)
         #assess
@@ -156,9 +157,11 @@ class statstool:
     pass
 
 
-class AMRfiles(flatten,statstool,h5amr):
+class AMRfiles(statstool,h5amr):
     def __init__(self, path):
         self.path = path
+        self.amrfile = AMRfile()
+        self.flatten = flatten()
 
 
     def get_files(self):
@@ -169,14 +172,14 @@ class AMRfiles(flatten,statstool,h5amr):
     def flattenAMR(self,flatten):
         files = self.get_files()
         for f in files:
-            flatten.flatten(f,flatten)
+            self.flatten.flatten(f,flatten)
 
 
- #   def nc2AMR(self,nc2amrtool, var):
- #       files = self.get_files()
- #       for f in files:
- #           
- #       return output        
+    def nc2AMR(self,nc2amrtool, var):
+        files = self.get_files()
+        for f in files:
+            self.amrfile.nc2amr(f,nc2amrtool,var)           
+
 
     def lev0means(self):
         '''For each file in directory of files in a timeseries, 
@@ -185,10 +188,10 @@ class AMRfiles(flatten,statstool,h5amr):
         output: pandas dataframe'''
 
         files = self.get_files()
-        names, n_components = AMRfile.get_varnames(files[0])
+        names, n_components = self.amrfile.get_varnames(files[0])
         df = pd.DataFrame(columns=names)
             
-        res = Parallel(n_jobs=2)(delayed(AMRfile.get_varmeans)
+        res = Parallel(n_jobs=2)(delayed(self.amrfile.get_varmeans)
                                                 (f, df, n_components)
                                                 for f in files) 
         series = [i[0] for i in res]
@@ -213,7 +216,7 @@ class AMRfiles(flatten,statstool,h5amr):
         df = pd.DataFrame(columns = 
                         ["time", "volumeAll", "volumeAbove", "groundedArea", 
                         "floatingArea", "totalArea", "groundedPlusLand"])  
-        series_list = Parallel(n_jobs=num_jobs)(delayed(AMRfile.statsRetrieve)
+        series_list = Parallel(n_jobs=num_jobs)(delayed(self.amrfile.statsRetrieve)
                                                 (statsTool,i,df,hdf5)
                                                 for i in files) 
         df = df.append(series_list, ignore_index=True)

@@ -3,7 +3,7 @@ import xarray as xr
 import pandas as pd
 
 
-class Freshwater(BISICLES):
+class Freshwater:
     def __init__(self,df):
         self.df = df
 

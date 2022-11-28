@@ -14,7 +14,6 @@ class AMRfile:
     def __init__(self,file):
         self.file = file # file name
 
-
     def find_name(self):
         name = os.path.splitext(os.path.basename(self.file))[0]
         assert len(name) > 0, "name is empty"
@@ -30,7 +29,7 @@ class AMRfile:
 
 
 class flatten:
-    def __init__(self, file):
+    def __init__(self,file):
         self.file = file
         self.amrfile = AMRfile(file)
 
@@ -62,12 +61,31 @@ class flatten:
         series = pd.Series(means, index = df.columns)
         df = df.append(series, ignore_index=True)
         assert df.empty == False, "Dataframe should not be empty"
-        return df        
+        return df 
 
-    def flattenStats(self,flatten):
+    def flattenSum(self,dat):
+        vars = []
+        means = []
+        for i in dat:
+            m = dat[i].sum().values
+            vars.append(i)
+            means.append(m)
+        df = pd.DataFrame(columns=vars)
+        series = pd.Series(means, index = df.columns)
+        df = df.append(series, ignore_index=True)
+        assert df.empty == False, "Dataframe should not be empty"
+        return df           
+
+    def mean(self,flatten):
         dat = self.open(flatten)
         df = self.flattenMean(dat)
         return df
+
+    def sum(self,flatten):
+        dat = self.open(flatten)
+        df = self.flattenSum(dat)
+        return df
+
     pass  
 
 class h5amr:     

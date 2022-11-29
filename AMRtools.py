@@ -28,6 +28,7 @@ class AMRfile:
         nc2amrOutput.communicate()[0]
 
 
+# Build in support for other coordinates
 class flatten:
     def __init__(self,file):
         self.file = file
@@ -49,6 +50,8 @@ class flatten:
         #assess
         return dat
 
+
+# Build support for regions into these functions
 
     def flattenMean(self,dat):
         vars = []
@@ -83,6 +86,7 @@ class flatten:
 
     def sum(self,flatten):
         dat = self.open(flatten)
+        print(dat)
         df = self.flattenSum(dat)
         return df
 

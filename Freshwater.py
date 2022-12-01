@@ -7,6 +7,8 @@ import numpy as np
 
 
 class Freshwater:
+    regions = {"smask0":"anta","smask1":"apen", "smask2":"amun","smask3":"ross","smask4":"eais","smask5":"wedd"}
+
     def __init__(self,flatten,file1,file2):
         self.flatten = flatten
         self.file1 = file1
@@ -62,7 +64,6 @@ class Freshwater:
 
 # Ought to figure out why the resolution is so low in the flattened file
 # Also make sure the downsampling has worked and that it covers the correct regions
-# Relate the dumb names to actual region names
     def RegionalContribution(self,mask_path,nc_out,driver):
         x,y,masks = self.region(mask_path,nc_out,driver)
         dat1 = flt(self.file1).open(driver)
@@ -70,12 +71,13 @@ class Freshwater:
         discharge = {}
         basal = {}
         for key, m in masks.items():
+            reg = self.regions.get(key)
             df1 = self.maskRegion(dat1,m)
             df2 = self.maskRegion(dat2,m)
             U = (self.Calving(df2.activeSurfaceThicknessSource,df2.activeBasalThicknessSource,df1.thickness,df2.thickness))/(10**3)
             bmb = -df2.activeBasalThicknessSource/(10**3)
-            discharge[key] = U
-            basal[key] = bmb
+            discharge[reg] = U
+            basal[reg] = bmb
         discharge_df = pd.DataFrame.from_dict(discharge)
         basal_df = pd.DataFrame.from_dict(basal)
         return discharge_df, basal_df

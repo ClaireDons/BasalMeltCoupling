@@ -330,3 +330,5 @@ class LevermannMask(BasalMelt):
             da.to_netcdf(self.nc_out+ name + '.nc')
             os.system(self.driver + " " + self.nc_out + name + ".nc " + self.nc_out + name + ".2d.hdf5 bm")
     pass
+
+'''Maybe should take the driver out of the init function as it isn't relevant for all of the methods'''

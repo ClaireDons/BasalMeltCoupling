@@ -31,15 +31,10 @@ driver = '/perm/nlcd/bisicles/BISICLES/code/filetools/nctoamr2d.Linux.64.mpiCC.g
 
 
 fw = FW.Freshwater(flatten, file_path1, file_path2)
-#x,y,masks = fw.region(mask_path,nc_out,flatten)
-#print(masks)
-#print(x)
-#print(y)
-
 b = fw.BasalContribution()
 u = fw.CalvingContribution()
 print(u,b)
 
-
 discharge, basal = fw.RegionalContribution(mask_path,nc_out,flatten)
-print(discharge,basal)
+print(discharge)
+print(basal)

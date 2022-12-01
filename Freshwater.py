@@ -49,8 +49,8 @@ class Freshwater:
         sums = []
         for i in dat:
             ar = np.array(dat[i])
-            r = np.where(new_m != 0, ar, 0)
-            sum = r.sum()
+            r = np.where(new_m != 0, ar, np.nan)
+            sum = np.nansum(r)
             cols.append(i)
             sums.append(sum)
         df = pd.DataFrame(columns=cols)
@@ -62,6 +62,7 @@ class Freshwater:
 
 # Ought to figure out why the resolution is so low in the flattened file
 # Also make sure the downsampling has worked and that it covers the correct regions
+# Relate the dumb names to actual region names
     def RegionalContribution(self,mask_path,nc_out,driver):
         x,y,masks = self.region(mask_path,nc_out,driver)
         dat1 = flt(self.file1).open(driver)
@@ -75,7 +76,9 @@ class Freshwater:
             bmb = -df2.activeBasalThicknessSource/(10**3)
             discharge[key] = U
             basal[key] = bmb
-        return discharge, basal
+        discharge_df = pd.DataFrame.from_dict(discharge)
+        basal_df = pd.DataFrame.from_dict(basal)
+        return discharge_df, basal_df
         
     pass
 

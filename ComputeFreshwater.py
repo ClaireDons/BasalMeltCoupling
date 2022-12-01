@@ -1,15 +1,5 @@
 import Freshwater as FW
-from AMRtools import flatten as flat
 
-#from AMRtools import AMRfile as amr
-
-### 1. Flatten file (Maybe I don't even need this step)
-### 2. Pull 2 most recent files, if 2 files don't exist then end the process
-### 3. Compute integrated mean over all the variables, and create a df
-### 4. Compute the volume difference
-### 5. Compute discharge, U
-### 6. Compute BMB
-### 7. Pass values to dataframe, as input to EC-Earth
 
 # Define parameters
 path = "/nobackup/users/donnelly/BasalMeltCoupling/"
@@ -31,15 +21,6 @@ driver = '/perm/nlcd/bisicles/BISICLES/code/filetools/nctoamr2d.Linux.64.mpiCC.g
 
 
 fw = FW.Freshwater(flatten, file_path1, file_path2)
-#x,y,masks = fw.region(mask_path,nc_out,flatten)
-#print(masks)
-#print(x)
-#print(y)
-
-b = fw.BasalContribution()
-u = fw.CalvingContribution()
-print(u,b)
-
-
 discharge, basal = fw.RegionalContribution(mask_path,nc_out,flatten)
-print(discharge,basal)
+print(discharge)
+print(basal)

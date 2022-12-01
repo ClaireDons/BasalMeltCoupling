@@ -5,6 +5,8 @@ from glob import glob
 import os
 
 class LevermannSectors:
+    """ Class for Levermann region related calculations"""
+
     eais1 = [-76,-65,0,173]
     eais2 = [-76,-65,350,0]
     wedd = [-90,-72,295,350]
@@ -75,12 +77,14 @@ class LevermannSectors:
 
 
     def sector_sel(self,ds_var,mask):
+        """Select the region"""
         ds_sel = ds_var.where(mask)
         return ds_sel
     pass
 
 
 class OceanData(LevermannSectors):
+    """Class of ocean output file related calculations"""
 
     def __init__(self,thetao,area,gamma):
         self.thetao = thetao
@@ -251,6 +255,8 @@ class OceanData(LevermannSectors):
     pass
 
 class BasalMelt(OceanData):
+    """Class for Basal Melt calculation related calculations"""
+
     # Parameters to compute basal ice shelf melt (Favier 2019)
     rho_i = 917. #ice density kg m-3
     rho_sw = 1028. # sea water density
@@ -296,6 +302,7 @@ class BasalMelt(OceanData):
 
 
 class LevermannMask(BasalMelt):
+    """Class for Basal Melt calculation of Levermann regions"""
     def __init__(self,mask_path,nc_out,driver):
         self.mask_path = mask_path
         self.nc_out = nc_out

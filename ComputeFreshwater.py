@@ -41,4 +41,5 @@ u = fw.CalvingContribution()
 print(u,b)
 
 
-fw.RegionalContribution(mask_path,nc_out,flatten)
+discharge, basal = fw.RegionalContribution(mask_path,nc_out,flatten)
+print(discharge,basal)

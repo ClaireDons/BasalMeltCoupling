@@ -47,7 +47,7 @@ class flatten:
         name = self.amrfile.find_name()
         nc = name + ".nc"
         dat = xr.open_dataset(nc)
-        #assess
+        assert dat.time.size != 0, "dataset is empty"
         return dat
 
 
@@ -86,7 +86,6 @@ class flatten:
 
     def sum(self,flatten):
         dat = self.open(flatten)
-        print(dat)
         df = self.flattenSum(dat)
         return df
 

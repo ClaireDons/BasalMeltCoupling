@@ -3,6 +3,7 @@ from BasalMelt import LevermannMask as lvm
 import xarray as xr
 import pandas as pd
 from scipy import ndimage
+import numpy as np
 
 
 class Freshwater:
@@ -41,14 +42,40 @@ class Freshwater:
         return -bmb
 
 
+    def maskRegion(self,dat, m):
+        new_m = ndimage.interpolation.zoom(m,0.125)
+        assert dat.thickness.shape == new_m.shape, "arrays are not the same shape"
+        cols = []
+        sums = []
+        for i in dat:
+            ar = np.array(dat[i])
+            r = np.where(new_m != 0, ar, 0)
+            sum = r.sum()
+            cols.append(i)
+            sums.append(sum)
+        df = pd.DataFrame(columns=cols)
+        series = pd.Series(sums, index=df.columns)
+        df = df.append(series, ignore_index=True)
+        assert df.empty == False, "Dataframe is empty"
+        return df
+
+
+# Ought to figure out why the resolution is so low in the flattened file
+# Also make sure the downsampling has worked and that it covers the correct regions
     def RegionalContribution(self,mask_path,nc_out,driver):
         x,y,masks = self.region(mask_path,nc_out,driver)
-        dat = flt(self.file1).open(driver)
+        dat1 = flt(self.file1).open(driver)
+        dat2 = flt(self.file2).open(driver)
+        discharge = {}
+        basal = {}
         for key, m in masks.items():
-            new_m = ndimage.interpolation.zoom(m,0.125)
-            assert dat.thickness.shape == new_m.shape, "arrays are not the same shape"
-            r = dat.thickness.where(new_m != 0)
-            print(r)
-
+            df1 = self.maskRegion(dat1,m)
+            df2 = self.maskRegion(dat2,m)
+            U = (self.Calving(df2.activeSurfaceThicknessSource,df2.activeBasalThicknessSource,df1.thickness,df2.thickness))/(10**3)
+            bmb = -df2.activeBasalThicknessSource/(10**3)
+            discharge[key] = U
+            basal[key] = bmb
+        return discharge, basal
+        
     pass
 

@@ -2,6 +2,7 @@ from AMRtools import flatten as flt
 from BasalMelt import LevermannMask as lvm
 import xarray as xr
 import pandas as pd
+from scipy import ndimage
 
 
 class Freshwater:
@@ -43,14 +44,11 @@ class Freshwater:
     def RegionalContribution(self,mask_path,nc_out,driver):
         x,y,masks = self.region(mask_path,nc_out,driver)
         dat = flt(self.file1).open(driver)
-        assert dat.thickness.shape == list(masks.values())[0].shape, "arrays are not the same shape"
-
-        #for key, m in masks.items():
-          
-
-            #print(m)
-            #r = dat.where(m != 0)
-            #print(r)
+        for key, m in masks.items():
+            new_m = ndimage.interpolation.zoom(m,0.125)
+            assert dat.thickness.shape == new_m.shape, "arrays are not the same shape"
+            r = dat.thickness.where(new_m != 0)
+            print(r)
 
     pass
 

@@ -36,9 +36,9 @@ fw = FW.Freshwater(flatten, file_path1, file_path2)
 #print(x)
 #print(y)
 
-#b = fw.BasalContribution()
-#u = fw.CalvingContribution()
-#print(u,b)
+b = fw.BasalContribution()
+u = fw.CalvingContribution()
+print(u,b)
 
 
 fw.RegionalContribution(mask_path,nc_out,flatten)

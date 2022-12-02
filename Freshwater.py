@@ -3,11 +3,12 @@ from BasalMelt import LevermannMask as lvm
 import pandas as pd
 from scipy import ndimage
 import numpy as np
+from matplotlib import pyplot as plt
 
 # To Do:
 # 1. Redo functions so that the regional ones are based on the single ones and that they are shorter
 # 2. Ought to figure out why the resolution is so low in the flattened file
-# 3. Also make sure the downsampling has worked and that it covers the correct regions
+# 3. Should fix anta to be 1 for all of antarctica
 
 class Freshwater:
     """Class for Freshwater input calculation"""
@@ -35,34 +36,40 @@ class Freshwater:
     def Calving(self,smb,bmb,vol1,vol2):
         """Discharge Calculation"""
         div_vol = vol2 -vol1
-        U = smb + bmb - div_vol
+        U = (smb + bmb - div_vol)/(10**3)
         return U
 
 
-    def CalvingContribution(self):
+    def BasalMelt(self,var):
+        bmb =var/(10**3)  
+        return -bmb
+
+
+    def AntarcticCalvingContribution(self):
         """Calving Contribution"""
         df1 = self.get_sum(self.file1)
         df2 = self.get_sum(self.file2)
-        U = (self.Calving(df2.activeSurfaceThicknessSource,df2.activeBasalThicknessSource,df1.thickness,df2.thickness))/(10**3)
+        U = self.Calving(df2.activeSurfaceThicknessSource,df2.activeBasalThicknessSource,df1.thickness,df2.thickness)
         return U
 
 
-    def BasalContribution(self):
+    def AntarcticBasalContribution(self):
         """Basal Melt Contribuition"""
         df2 = self.get_sum(self.file2)
-        bmb = df2.activeBasalThicknessSource/(10**3)        
-        return -bmb
+        bmb = self.BasalMelt(df2.activeBasalThicknessSource)     
+        return bmb
 
 
     def maskRegion(self,dat, m):
         """Downsample masks, mask out region, take sum, output to dataframe"""
-        new_m = ndimage.interpolation.zoom(m,0.125)
+        mint = m.astype(int)
+        new_m = ndimage.interpolation.zoom(mint,0.125)
         assert dat.thickness.shape == new_m.shape, "arrays are not the same shape"
         cols = []
         sums = []
         for i in dat:
             ar = np.array(dat[i])
-            r = np.where(new_m != 0, ar, np.nan)
+            r = np.where(new_m == 1, ar, np.nan)
             sum = np.nansum(r)
             cols.append(i)
             sums.append(sum)
@@ -71,6 +78,14 @@ class Freshwater:
         df = df.append(series, ignore_index=True)
         assert df.empty == False, "Dataframe is empty"
         return df
+
+
+    def Contributions(self, dat1, dat2, m):
+        df1 = self.maskRegion(dat1,m)
+        df2 = self.maskRegion(dat2,m)
+        U = self.Calving(df2.activeSurfaceThicknessSource,df2.activeBasalThicknessSource,df1.thickness,df2.thickness)
+        bmb = self.BasalMelt(df2.activeBasalThicknessSource)
+        return U, bmb
 
 
     def RegionalContribution(self,mask_path,nc_out,driver):
@@ -82,10 +97,7 @@ class Freshwater:
         basal = {}
         for key, m in masks.items():
             reg = self.regions.get(key)
-            df1 = self.maskRegion(dat1,m)
-            df2 = self.maskRegion(dat2,m)
-            U = (self.Calving(df2.activeSurfaceThicknessSource,df2.activeBasalThicknessSource,df1.thickness,df2.thickness))/(10**3)
-            bmb = -df2.activeBasalThicknessSource/(10**3)
+            U,bmb = self.Contributions(dat1,dat2,m)
             discharge[reg] = U
             basal[reg] = bmb
         discharge_df = pd.DataFrame.from_dict(discharge)

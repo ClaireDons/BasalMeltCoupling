@@ -3,11 +3,11 @@ from BasalMelt import LevermannMask as lvm
 import pandas as pd
 from scipy import ndimage
 import numpy as np
+from matplotlib import pyplot as plt
 
 # To Do:
 # 1. Redo functions so that the regional ones are based on the single ones and that they are shorter
 # 2. Ought to figure out why the resolution is so low in the flattened file
-# 3. Also make sure the downsampling has worked and that it covers the correct regions
 
 class Freshwater:
     """Class for Freshwater input calculation"""
@@ -56,13 +56,14 @@ class Freshwater:
 
     def maskRegion(self,dat, m):
         """Downsample masks, mask out region, take sum, output to dataframe"""
-        new_m = ndimage.interpolation.zoom(m,0.125)
+        mint = m.astype(int)
+        new_m = ndimage.interpolation.zoom(mint,0.125)
         assert dat.thickness.shape == new_m.shape, "arrays are not the same shape"
         cols = []
         sums = []
         for i in dat:
             ar = np.array(dat[i])
-            r = np.where(new_m != 0, ar, np.nan)
+            r = np.where(new_m == 1, ar, np.nan)
             sum = np.nansum(r)
             cols.append(i)
             sums.append(sum)

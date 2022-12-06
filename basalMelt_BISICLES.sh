@@ -14,26 +14,27 @@ n=coupled_bm
 NC_PLOT=plot.$n.nc
 plots=/ec/res4/scratch/nlcd/CMIP6/bm_coupling/plots/
 FLATTEN="/perm/nlcd/bisicles/BISICLES/code/filetools/flatten2d.Linux.64.mpiCC.gfortran.DEBUG.MPI.ex"
-SH_BISICLES="bisicles_coupledbm.sh"
+SH_BISICLES="BISICLES_submission_template.sh"
 bm=basal_melt.2d.hdf5 
 
-### 1. Check for last plot file, if one exists, take most recent one and flatten to NetCDF.
+### 1. Check for last temperature file from EC-Earth, use for basal melt calculation
+###    (Maybe do it within Python).
 
-if test -n "$(find $plots -type f -name "plot.$n.??????.2d.hdf5" -print -quit)"
-    then
-    echo "Found plot"
-    LPLOT=`ls -th plots/plot.$n.??????.2d.hdf5 | head -n 1`
-    # Flatten the plot
-    $FLATTEN $LPLOT $NC_PLOT 0 -3333500 -3333500
-    # Pass on new fields to input file
-    echo "$NC_PLOT"
-fi
+#if test -n "$(find $plots -type f -name "plot.$n.??????.2d.hdf5" -print -quit)"
+#    then
+#    echo "Found plot"
+#    LPLOT=`ls -th plots/plot.$n.??????.2d.hdf5 | head -n 1`
+#    # Flatten the plot
+#    $FLATTEN $LPLOT $NC_PLOT 0 -3333500 -3333500
+#    # Pass on new fields to input file
+#    echo "$NC_PLOT"
+#fi
 
 ### 2. Run basal melt python script    
 python3 ComputeBasalMelt.py ${num} || exit
 
 ### 3. Define new basal melt values in input file
-export COUPLED=coupled_submission.sh
+export COUPLED=BISICLES_submission.sh
 echo "COUPLED = $COUPLED"
 cp $SH_BISICLES $COUPLED
 sed -i s/@melt/$bm/ $COUPLED

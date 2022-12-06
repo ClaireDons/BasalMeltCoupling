@@ -1,5 +1,4 @@
 import Freshwater as FW
-import os
 from glob import iglob
 
 

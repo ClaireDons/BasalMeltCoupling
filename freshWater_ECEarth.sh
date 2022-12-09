@@ -18,7 +18,7 @@ plots=/ec/res4/scratch/nlcd/CMIP6/bm_coupling/plots/
 if test -n "$(find $plots -type f -name "plot.$n.??????.2d.hdf5" -print -quit)"
     then
     echo "Found plot"
-    python3 ComputeFreshwater.py
+    python3 ComputeFreshwater.py ${num} || exit
 fi
 
 ### 2. Input BISICLES data into EC-Earth

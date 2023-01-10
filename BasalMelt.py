@@ -263,7 +263,7 @@ class BasalMelt(OceanData):
     c_po = 3974. # specific heat capacity of ocean mixed layer J kg-1 K-1
     L_i = 3.34*10**5 # latent heat of fusion of ice
     Tf = -1.6
-    baseline = 1
+    baseline = 1 ### THIS IS NOT 1, it needs to be fixed!
 
     def quad_constant(self):
         c_lin = (self.rho_sw*self.c_po)/(self.rho_i*self.L_i)

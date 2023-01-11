@@ -11,16 +11,20 @@ import xarray as xr
 import bisiclesh5 as b5
 
 class AMRfile:
+    """Class for methods related to AMR files"""
+
     def __init__(self,file):
         self.file = file # file name
 
     def find_name(self):
+        """Find the base name of the file"""
         name = os.path.splitext(os.path.basename(self.file))[0]
         assert len(name) > 0, "name is empty"
         return name
 
 
     def nc2amr(self, nc2amrtool, var):
+        """Create AMR file from Netcdf file"""
         name = self.find_name()
         amr = name + '.2d.hdf5'
         nc2amrOutput = subprocess.Popen([nc2amrtool, self.file, amr, var], stdout=subprocess.PIPE)
@@ -35,6 +39,7 @@ class flatten:
         self.amrfile = AMRfile(file)
 
     def flatten(self,flatten):
+        """Flatten AMR file to netcdf"""
         name = self.amrfile.find_name()
         nc = name + '.nc'
         flattenOutput = subprocess.Popen([flatten, self.file, nc, "0", "-3333500", "-3333500"], stdout=subprocess.PIPE)
@@ -43,6 +48,7 @@ class flatten:
 
 
     def open(self,flatten):
+        """Flatten AMR file and open it"""
         self.flatten(flatten)
         name = self.amrfile.find_name()
         nc = name + ".nc"
@@ -54,6 +60,7 @@ class flatten:
 # Build support for regions into these functions
 
     def flattenMean(self,dat):
+        """"""
         vars = []
         means = []
         for i in dat:
@@ -67,6 +74,7 @@ class flatten:
         return df 
 
     def flattenSum(self,dat):
+        """"""
         vars = []
         means = []
         for i in dat:
@@ -80,18 +88,23 @@ class flatten:
         return df           
 
     def mean(self,flatten):
+        """"""
         dat = self.open(flatten)
         df = self.flattenMean(dat)
         return df
 
     def sum(self,flatten):
+        """"""
         dat = self.open(flatten)
         df = self.flattenSum(dat)
         return df
 
     pass  
 
-class h5amr:     
+class h5amr: 
+    """Class for working with bisicles h5"""    
+
+
     def __init__(self, file):
         self.file = file
     
@@ -123,6 +136,9 @@ class h5amr:
         return series, t
 
 class statstool:
+    """Class for working with the bisicles stats tool"""
+
+
     def __init__(self, file):
         self.file = file    
 
@@ -179,6 +195,8 @@ class statstool:
 
 
 class AMRfiles(statstool,h5amr):
+    """Class for working on multiple AMR files"""
+
     def __init__(self, path):
         self.path = path
         self.amrfile = AMRfile()
@@ -186,17 +204,20 @@ class AMRfiles(statstool,h5amr):
 
 
     def get_files(self):
+        """ """
         files = glob(os.path.join(self.path, "*.2d.hdf5"))
         return files
 
 
     def flattenAMR(self,flatten):
+        """ """
         files = self.get_files()
         for f in files:
             self.flatten.flatten(f,flatten)
 
 
     def nc2AMR(self,nc2amrtool, var):
+        """ """
         files = self.get_files()
         for f in files:
             self.amrfile.nc2amr(f,nc2amrtool,var)           

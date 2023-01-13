@@ -11,7 +11,37 @@ from matplotlib import pyplot as plt
 # 3. Should fix anta to be 1 for all of antarctica
 
 class Freshwater:
-    """Class for Freshwater input calculation"""
+    """Class for Freshwater input calculation
+    ...
+
+    Attributes
+    ----------
+    regions (dict): Mapping from mask name to region
+    flatten (str): path to flatten driver
+    file1 (str): file1 name
+    file2 (str): file2 name
+
+    Methods
+    -------
+    region
+        Get region masks and extract them
+    get_sum
+        Get the sum for each variable based on a file
+    Calving
+        Discharge Calculation
+    BasalMelt
+        Basal melt calculation
+    AntarcticCalvingContribution
+        Calving Contribution
+    AntarcticBasalContribution
+        Basal Melt Contribuition
+    maskRegion
+        Downsample masks, mask out region, take sum, output to dataframe
+    Contributions
+        Calving and Basal melt contribution for each region of Antarctica
+    RegionalContribution
+        Calving and Basal melt contribution for each region of Antarctica
+    """
 
     regions = {"smask0":"anta","smask1":"apen", "smask2":"amun","smask3":"ross","smask4":"eais","smask5":"wedd"}
 
@@ -41,6 +71,7 @@ class Freshwater:
 
 
     def BasalMelt(self,var):
+        """Basal melt calculation"""
         bmb =var/(10**3)  
         return -bmb
 

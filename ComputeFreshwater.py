@@ -5,6 +5,7 @@ based on BISICLES output.
 
 This script requires paths to levermann region masks, bisicles plot files,
 BISICLES flatten tool.
+Requires the Freshwater modules and glob
 """
 
 import Freshwater as FW

@@ -6,6 +6,7 @@ to a BISICLES AMR file
 
 This script requires paths to EC-Earth area and ocean temperature files,
 path to levermann region maks, chosen gamma value and path to bisisles nc2amr tool.
+Requires the BasalMelt module.
 """
 
 import BasalMelt as BM

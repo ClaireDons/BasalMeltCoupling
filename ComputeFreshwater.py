@@ -1,3 +1,12 @@
+"""Freshwater Calculation
+
+This script calculates freshwater input for the Levermann regions,
+based on BISICLES output.
+
+This script requires paths to levermann region masks, bisicles plot files,
+BISICLES flatten tool.
+"""
+
 import Freshwater as FW
 from glob import iglob
 

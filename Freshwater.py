@@ -81,6 +81,7 @@ class Freshwater:
 
 
     def Contributions(self, dat1, dat2, m):
+        """Calving and Basal melt contribution for each region of Antarctica"""
         df1 = self.maskRegion(dat1,m)
         df2 = self.maskRegion(dat2,m)
         U = self.Calving(df2.activeSurfaceThicknessSource,df2.activeBasalThicknessSource,df1.thickness,df2.thickness)

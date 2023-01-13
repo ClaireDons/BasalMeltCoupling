@@ -1,3 +1,13 @@
+"""Basal Melt Calculation
+
+This script calculates basal melt for the Levermann regions,
+based on an EC-Earth ocean temperature file and maps them 
+to a BISICLES AMR file
+
+This script requires paths to EC-Earth area and ocean temperature files,
+path to levermann region maks, chosen gamma value and path to bisisles nc2amr tool.
+"""
+
 import BasalMelt as BM
 
 # Define parameters

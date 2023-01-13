@@ -5,7 +5,29 @@ from glob import glob
 import os
 
 class LevermannSectors:
-    """ Class for Levermann region related calculations"""
+    """ Class for Levermann region related calculations
+    ...
+
+    Attributes
+    ----------
+    eais1, eais2 (list): coordinates for east antarctica
+    wedd (list): coordinates for weddel
+    amun (list): coordinates for amundsen
+    ross (list): coordinates for ross
+    apen1,apen2 (list): corrdinates for antarctic peninsula
+    sectors (list): list of region names (str)
+    find_shelf_depth (dict): dictionary containing shelfbase depth for each region
+    ds (xarray dataset): xarray dataset of ocean temperature
+
+    Methods
+    -------
+    create_mask
+        creates mask based on coordinates
+    sector_masks
+        create dictionary of masks
+    sector_sel
+        select a region
+    """
 
     eais1 = [-76,-65,0,173]
     eais2 = [-76,-65,350,0]
@@ -36,7 +58,7 @@ class LevermannSectors:
             ds (xarray dataset): thetao dataset
             lat1,lat2,lon1,lon2 (int): coordinates of sector
         Returns:
-            mask (): mask of sector
+            mask (item): mask of sector
         """
         try:
             lat='latitude'
@@ -58,7 +80,7 @@ class LevermannSectors:
             ds (xarray dataset): thetao dataset
             sector (str): sector name
         Returns:
-            mask (): mask of sector
+            mask (item): mask of sector
         '''
 
         mask_eais = self.create_mask(self.eais1)     
@@ -77,14 +99,52 @@ class LevermannSectors:
 
 
     def sector_sel(self,ds_var,mask):
-        """Select the region"""
+        """Select the region
+        Args:
+            ds_var (xarray data variable): variable to select
+            mask (item): mask of region    
+        Returns:
+            ds_sel: selection of variable based on mask
+        """
         ds_sel = ds_var.where(mask)
         return ds_sel
     pass
 
 
 class OceanData(LevermannSectors):
-    """Class of ocean output file related calculations"""
+    """Class of ocean output file related calculations
+    ...
+
+    Attributes
+    ----------
+    thetao (str): name of ocean temperature file
+    area (str): name of areacello file
+    gamma (float): gamma value for chosen model
+
+    Methods
+    -------
+    area_weighted_mean
+        Compute area weighted mean of ocean temperature over a sector
+    nearest_mask
+        Mask the values outside of target depth
+    nearest_above
+        Find nearest value above target value
+    nearest_below
+        Find nearest value below target value
+    lev_weighted_mean
+        Compute depth weighted mean oceanic temperature over specific 
+        oceanic sector and specific depth layers 
+    ShelfBase
+        select oceanic layers based on shelf depth
+    select_depth_range
+        Select depth bounds of sector
+    select_lev_mean
+        Compute mean of depth bounds
+    select_area_mean
+        Compute area mean of sector
+    weighted_mean_df
+        Compute volume weighted mean for one year of thetao
+    """
 
     def __init__(self,thetao,area,gamma):
         self.thetao = thetao
@@ -205,7 +265,7 @@ class OceanData(LevermannSectors):
 
     
     def select_depth_range(self,sector):
-        # Select depth bounds of sector
+        """Select depth bounds of sector"""
         depth_bnds_sector = self.ShelfBase(sector)     
         top = depth_bnds_sector[0]
         bottom = depth_bnds_sector[1]
@@ -213,12 +273,14 @@ class OceanData(LevermannSectors):
     
 
     def sector_lev_mean(self, ds, lev_bnds, sector):
+        """Compute mean of depth bounds"""
         top, bottom = self.select_depth_range(sector)
         lev_weighted_mean = self.lev_weighted_mean(ds,lev_bnds,top,bottom)
         return lev_weighted_mean
 
 
     def sector_area_mean(self,ds_var,mask, ds_area):
+        """Compute area mean of sector"""
         ds_sel = self.sector_sel(ds_var,mask)
         area_weighted_mean = self.area_weighted_mean(ds_sel, ds_area)
         return area_weighted_mean
@@ -255,17 +317,40 @@ class OceanData(LevermannSectors):
     pass
 
 class BasalMelt(OceanData):
-    """Class for Basal Melt calculation related calculations"""
+    """Class for Basal Melt calculation related calculations
+    ...
+
+    Attributes
+    ----------
+    rho_i (float): ice density kg m-3
+    rho_sw (float): sea water density
+    c_po (float): specific heat capacity of ocean mixed layer J kg-1 K-1
+    L_i (float): latent heat of fusion of ice
+    Tf (float): Freezing temperature
+    baseline (float): baseline climate mean temperature
+
+    Methods
+    -------
+    quad_constant
+        Calculate quadratic constant
+    quadBasalMelt
+        Calculate basal melt
+    BasalMeltAnomalies
+        Calculate basal melt anomaly
+    thetao2basalmelt
+        Calculate basal melt from 3D ocean temperature file
+    """
 
     # Parameters to compute basal ice shelf melt (Favier 2019)
-    rho_i = 917. #ice density kg m-3
-    rho_sw = 1028. # sea water density
-    c_po = 3974. # specific heat capacity of ocean mixed layer J kg-1 K-1
-    L_i = 3.34*10**5 # latent heat of fusion of ice
+    rho_i = 917. 
+    rho_sw = 1028. 
+    c_po = 3974. 
+    L_i = 3.34*10**5 
     Tf = -1.6
     baseline = 1 ### THIS IS NOT 1, it needs to be fixed!
 
     def quad_constant(self):
+        """Calculate quadratic constant"""
         c_lin = (self.rho_sw*self.c_po)/(self.rho_i*self.L_i)
         c_quad = (c_lin)**2
         ms = self.gamma * 10**5 * c_quad # Quadratic constant
@@ -273,12 +358,14 @@ class BasalMelt(OceanData):
 
 
     def quadBasalMelt(self,dat):
+        """Calculate basal melt"""
         ms = self.quad_constant()
         bm = (dat - self.Tf)*(abs(dat)-self.Tf) * ms
         return bm
 
 
     def BasalMeltAnomalies(self, thetao):
+        """Calculate basal melt anomaly"""
         BM_base = self.quadBasalMelt(self.baseline)
         BM = self.quadBasalMelt(thetao) 
         dBM = BM - BM_base
@@ -288,6 +375,7 @@ class BasalMelt(OceanData):
 
 
     def thetao2basalmelt(self):
+        """Calculate basal melt from 3D ocean temperature file"""
         ocean = OceanData(self.thetao,self.area,self.gamma)
         df = ocean.weighted_mean_df()
         df2 =  pd.DataFrame()
@@ -302,13 +390,29 @@ class BasalMelt(OceanData):
 
 
 class LevermannMask(BasalMelt):
-    """Class for Basal Melt calculation of Levermann regions"""
+    """Class for Basal Melt calculation of Levermann regions
+    ...
+
+    Attributes
+    ----------
+    mask_path (str): Path to mask files
+    nc_out (str): Path to where nc files need to be output
+    driver (str): Path to where nc2amr driver
+
+    Methods
+    -------
+    OpenMasks
+        Open region masks and create dictionary
+    map2amr
+        Map basal melt values to corresponding masks and create amr file
+    """
     def __init__(self,mask_path,nc_out,driver):
         self.mask_path = mask_path
         self.nc_out = nc_out
         self.driver = driver
         
     def OpenMasks(self):
+        """Open region masks and create dictionary"""
         nc_files = glob(os.path.join(self.mask_path, "*.2d.nc"))
         bisicles_masks = {}
         for file in nc_files:
@@ -324,6 +428,7 @@ class LevermannMask(BasalMelt):
 
 
     def map2amr(self,name,df2):
+        """Map basal melt values to corresponding masks and create amr file"""
         x,y,bisicles_masks = self.OpenMasks()
         #bm = BasalMelt()
         #df2 = self.thetao2basalmelt()

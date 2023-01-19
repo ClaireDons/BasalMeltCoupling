@@ -347,7 +347,7 @@ class BasalMelt(OceanData):
     c_po = 3974. 
     L_i = 3.34*10**5 
     Tf = -1.6
-    baseline = 1 ### THIS IS NOT 1, it needs to be fixed!
+    baseline = 1 ### THIS IS NOT 1, it needs to be fixed! (Should be able to take list/dictionary)
 
     def quad_constant(self):
         """Calculate quadratic constant"""
@@ -360,7 +360,7 @@ class BasalMelt(OceanData):
     def quadBasalMelt(self,dat):
         """Calculate basal melt"""
         ms = self.quad_constant()
-        bm = (dat - self.Tf)*(abs(dat)-self.Tf) * ms
+        bm = (dat - self.Tf)*(abs(dat-self.Tf)) * ms
         return bm
 
 

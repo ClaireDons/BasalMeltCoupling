@@ -10,6 +10,7 @@ Requires the Freshwater modules and glob
 
 import Freshwater as FW
 from glob import iglob
+import pandas as pd
 
 
 # Define paths
@@ -31,5 +32,7 @@ print(LatestFile)
 
 fw = FW.Freshwater(flatten, PenultimateFile, LatestFile)
 discharge, basal = fw.RegionalContribution(mask_path,nc_out,flatten)
+discharge.to_csv("discharge.csv", index=False)
+basal.to_csv("basal.csv", index=False)
 print(discharge)
 print(basal)

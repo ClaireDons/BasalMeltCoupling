@@ -123,8 +123,8 @@ class Freshwater:
     def RegionalContribution(self,mask_path,nc_out,driver):
         """Calving and Basal melt contribution for each region of Antarctica"""
         x,y,masks = self.region(mask_path,nc_out,driver)
-        dat1 = flt(self.file1).open(driver)
-        dat2 = flt(self.file2).open(driver)
+        dat1 = flt(self.file1).open(driver, nc_out)
+        dat2 = flt(self.file2).open(driver, nc_out)
         discharge = {}
         basal = {}
         for key, m in masks.items():

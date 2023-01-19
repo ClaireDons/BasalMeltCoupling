@@ -11,7 +11,7 @@ export PYTHONPATH=`pwd`
 export LD_LIBRARY_PATH=$HDF5_PARALLEL_DIR/lib:$PYTHON3_DIR/lib:$LD_LIBRARY_PATH
 
 n=coupled_bm
-plots=/ec/res4/scratch/nlcd/CMIP6/bm_coupling/plots/
+plots=/ec/res4/scratch/nlcd/CMIP6/bm_coupling/plots/hdf5/
 
 
 ### 1. Check whether plot files exist, if they do run python script

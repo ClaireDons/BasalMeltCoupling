@@ -16,8 +16,8 @@ import pandas as pd
 # Define paths
 path =  "/ec/res4/scratch/nlcd/CMIP6/bm_coupling/"
 mask_path = path + "levermann_masks/"
-nc_out = path 
-plot_path = path + "plots/"
+nc_out = path + "plots/nc/"
+plot_path = path + "plots/hdf5/"
 
 # Define parameters
 filetoolsPath = r'/perm/nlcd/bisicles/BISICLES/code/filetools/'

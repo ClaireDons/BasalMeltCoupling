@@ -38,20 +38,20 @@ class flatten:
         self.file = file
         self.amrfile = AMRfile(file)
 
-    def flatten(self,flatten):
+    def flatten(self,flatten,path):
         """Flatten AMR file to netcdf"""
         name = self.amrfile.find_name()
-        nc = name + '.nc'
+        nc = path + name + '.nc'
         flattenOutput = subprocess.Popen([flatten, self.file, nc, "0", "-3333500", "-3333500"], stdout=subprocess.PIPE)
         # assess
         flattenOutput.communicate()[0]
 
 
-    def open(self,flatten):
+    def open(self,flatten,path):
         """Flatten AMR file and open it"""
-        self.flatten(flatten)
+        self.flatten(flatten,path)
         name = self.amrfile.find_name()
-        nc = name + ".nc"
+        nc = path + name + ".nc"
         dat = xr.open_dataset(nc)
         assert dat.time.size != 0, "dataset is empty"
         return dat

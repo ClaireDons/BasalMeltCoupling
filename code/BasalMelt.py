@@ -349,6 +349,9 @@ class BasalMelt(OceanData):
     Tf = -1.6
     baseline = 1 ### THIS IS NOT 1, it needs to be fixed! (Should be able to take list/dictionary)
 
+    #def __init__(self,bl):
+    #    self.bl = bl
+
     def quad_constant(self):
         """Calculate quadratic constant"""
         c_lin = (self.rho_sw*self.c_po)/(self.rho_i*self.L_i)
@@ -379,6 +382,8 @@ class BasalMelt(OceanData):
         ocean = OceanData(self.thetao,self.area,self.gamma)
         df = ocean.weighted_mean_df()
         df2 =  pd.DataFrame()
+        #baseline_df = pd.read_csv(self.bl)
+        #print(baseline_df)
         for column in df:
             thetao = df[column].values
             dBM = self.BasalMeltAnomalies(thetao)

@@ -23,7 +23,7 @@ echo "INFILE = $INFILE"
 cp $INFILEBASE $INFILE
 
 n=coupled_bm
-checkpoints=/ec/res4/scratch/nlcd/CMIP6/bm_coupling/checkpoints
+checkpoints=/ec/res4/scratch/nlcd/CMIP6/bm_coupling/outputs/checkpoints
 bm=basal_melt.2d.hdf5
 
 count=$(find outputs/checkpoints/chk.* -maxdepth 1 -type f|wc -l)
@@ -42,6 +42,7 @@ export CH_OUTPUT_INTERVAL=0
  # work out what the latest checkpoint file is (if it exists)
 if test -n "$(find $checkpoints -type f -name "chk.$n.??????.2d.hdf5" -print -quit)"
     then
+    echo "Checkpoint found"
     LCHK=`ls outputs/checkpoints/chk.coupled_bm.??????.2d.hdf5 | tail -n 1`
     echo "" >> $INFILE #ensure line break
     echo "amr.restart_file=$LCHK" >> $INFILE

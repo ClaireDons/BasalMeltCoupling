@@ -1,6 +1,6 @@
 #main.poutBaseName = pout.@NAME
-amr.plot_prefix = plots/hdf5/plot.@NAME.
-amr.check_prefix = checkpoints/chk.@NAME.
+amr.plot_prefix = outputs/plots/hdf5/plot.@NAME.
+amr.check_prefix = outputs/checkpoints/chk.@NAME.
 
 
 #domain details

@@ -13,13 +13,13 @@ import BasalMelt as BM
 
 # Define parameters
 path = "/ec/res4/scratch/nlcd/CMIP6/bm_coupling/"
-area_file = path + "ec-earth_data/areacello_Ofx_EC-Earth3_historical_r1i1p1f1_gn.nc"
-thetao_file = path + "ec-earth_data/thetao_Omon_EC-Earth3_historical_r1i1p1f1_gn_201401-201412.nc"
+area_file = path + "inputs/ec-earth_data/areacello_Ofx_EC-Earth3_historical_r1i1p1f1_gn.nc"
+thetao_file = path + "inputs/ec-earth_data/thetao_Omon_EC-Earth3_historical_r1i1p1f1_gn_201401-201412.nc"
 gamma = 0.05
 name = 'basal_melt'
 
 # Define paths
-mask_path = path + "levermann_masks/"
+mask_path = path + "inputs/levermann_masks/"
 nc_out = path
 
 # Load leverman masks (Maybe in future should just be replaces with coordinates)

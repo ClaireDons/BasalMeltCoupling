@@ -277,3 +277,4 @@ po/*~
 pout.*
 slurm-*
 inputs.setup.*
+ecsbatch.log.*

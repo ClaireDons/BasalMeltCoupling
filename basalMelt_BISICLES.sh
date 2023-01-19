@@ -12,7 +12,7 @@ export LD_LIBRARY_PATH=$HDF5_PARALLEL_DIR/lib:$PYTHON3_DIR/lib:$LD_LIBRARY_PATH
 
 n=coupled_bm
 NC_PLOT=plot.$n.nc
-plots=/ec/res4/scratch/nlcd/CMIP6/bm_coupling/plots/
+plots=/ec/res4/scratch/nlcd/CMIP6/bm_coupling/outputs/plots/hdf5/
 FLATTEN="/perm/nlcd/bisicles/BISICLES/code/filetools/flatten2d.Linux.64.mpiCC.gfortran.DEBUG.MPI.ex"
 SH_BISICLES="BISICLES_submission_template.sh"
 bm=basal_melt.2d.hdf5 
@@ -31,7 +31,7 @@ bm=basal_melt.2d.hdf5
 #fi
 
 ### 2. Run basal melt python script    
-python3 ComputeBasalMelt.py ${num} || exit
+python3 code/ComputeBasalMelt.py ${num} || exit
 
 ### 3. Define new basal melt values in input file
 export COUPLED=BISICLES_submission.sh

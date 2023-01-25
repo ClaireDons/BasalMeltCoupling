@@ -119,7 +119,6 @@ class OceanData(LevermannSectors):
     ----------
     thetao (str): name of ocean temperature file
     area (str): name of areacello file
-    gamma (float): gamma value for chosen model
 
     Methods
     -------
@@ -146,10 +145,9 @@ class OceanData(LevermannSectors):
         Compute volume weighted mean for one year of thetao
     """
 
-    def __init__(self,thetao,area,gamma):
+    def __init__(self,thetao,area):
         self.thetao = thetao
         self.area = area
-        self.gamma = gamma
 
 
     def area_weighted_mean(self, ds_sel,ds_area):
@@ -328,6 +326,7 @@ class BasalMelt(OceanData):
     L_i (float): latent heat of fusion of ice
     Tf (float): Freezing temperature
     baseline (float): baseline climate mean temperature
+    gamma (float): gamma value for chosen model
 
     Methods
     -------
@@ -349,8 +348,10 @@ class BasalMelt(OceanData):
     Tf = -1.6
     baseline = 1 ### THIS IS NOT 1, it needs to be fixed! (Should be able to take list/dictionary)
 
-    #def __init__(self,bl):
-    #    self.bl = bl
+    def __init__(self,thetao,area,gamma):
+        #self.bl = bl
+        OceanData.__init__(self,thetao,area)
+        self.gamma = gamma
 
     def quad_constant(self):
         """Calculate quadratic constant"""
@@ -379,8 +380,8 @@ class BasalMelt(OceanData):
 
     def thetao2basalmelt(self):
         """Calculate basal melt from 3D ocean temperature file"""
-        ocean = OceanData(self.thetao,self.area,self.gamma)
-        df = ocean.weighted_mean_df()
+        #ocean = OceanData(self.thetao,self.area)
+        df = self.weighted_mean_df()
         df2 =  pd.DataFrame()
         #baseline_df = pd.read_csv(self.bl)
         #print(baseline_df)

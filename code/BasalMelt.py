@@ -346,10 +346,9 @@ class BasalMelt(OceanData):
     c_po = 3974. 
     L_i = 3.34*10**5 
     Tf = -1.6
-    baseline = 1 ### THIS IS NOT 1, it needs to be fixed! (Should be able to take list/dictionary)
+    baseline = {'eais':0.27209795341055726,'wedd':-1.471784486780416,'amun':2.1510233407460326,'ross':0.5177848939696833,'apen':-0.6192596251283067}
 
     def __init__(self,thetao,area,gamma):
-        #self.bl = bl
         OceanData.__init__(self,thetao,area)
         self.gamma = gamma
 
@@ -368,9 +367,9 @@ class BasalMelt(OceanData):
         return bm
 
 
-    def BasalMeltAnomalies(self, thetao):
+    def BasalMeltAnomalies(self, thetao, base):
         """Calculate basal melt anomaly"""
-        BM_base = self.quadBasalMelt(self.baseline)
+        BM_base = self.quadBasalMelt(base)
         BM = self.quadBasalMelt(thetao) 
         dBM = BM - BM_base
         assert dBM < 100, "Basal melt too unrealistic"
@@ -380,14 +379,12 @@ class BasalMelt(OceanData):
 
     def thetao2basalmelt(self):
         """Calculate basal melt from 3D ocean temperature file"""
-        #ocean = OceanData(self.thetao,self.area)
         df = self.weighted_mean_df()
         df2 =  pd.DataFrame()
-        #baseline_df = pd.read_csv(self.bl)
-        #print(baseline_df)
         for column in df:
             thetao = df[column].values
-            dBM = self.BasalMeltAnomalies(thetao)
+            base = self.baseline.get(column)
+            dBM = self.BasalMeltAnomalies(thetao, base)
             df2[column]=dBM
         assert df2.empty == False, "Dataframe should not be empty"
         print(df2)

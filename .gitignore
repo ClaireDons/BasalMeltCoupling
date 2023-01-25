@@ -264,6 +264,7 @@ po/*~
 *.nc
 *.hdf5
 *.h5
+*.csv
 
 # Ignore pictures
 *.png

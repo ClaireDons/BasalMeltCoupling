@@ -1,5 +1,5 @@
 #!/bin/bash -l
-#SBATCH -J testrun
+#SBATCH -J bisicles
 #SBATCH -q np
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=1
@@ -26,9 +26,17 @@ n=coupled_bm
 checkpoints=/ec/res4/scratch/nlcd/CMIP6/bm_coupling/outputs/checkpoints
 bm=basal_melt.2d.hdf5
 
+# Count the number of checkpoints to increase time to run to incrementally 
 count=$(find outputs/checkpoints/chk.* -maxdepth 1 -type f|wc -l)
 echo $count
-let count=count+1 # Increase by one, for the next file number
+
+if test $count -eq 0
+then
+    let count=count+1
+else
+    let count=count # Increase by one, for the next file number
+fi 
+
 echo $count
 
 sed -i s/@NAME/$n/ $INFILE

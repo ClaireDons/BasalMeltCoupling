@@ -277,5 +277,5 @@ po/*~
 
 pout.*
 slurm-*
-inputs.setup.*
+inputs.ECEbasal.*
 ecsbatch.log.*

@@ -30,7 +30,7 @@ bm=basal_melt.2d.hdf5
 python3 code/ComputeBasalMelt.py ${num} || exit
 
 ### 5. Define new basal melt values in input file
-export COUPLED=ECE_BISI_basal2.sh
+export COUPLED=ECE_BISI_basal2.slurm
 echo "COUPLED = $COUPLED"
 cp $SH_BISICLES $COUPLED
 sed -i s/@melt/$bm/ $COUPLED

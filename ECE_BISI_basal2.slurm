@@ -36,7 +36,7 @@ if test $count -eq 0
 then
     let count=count+1
 else
-    let count=count # Increase by one, for the next file number
+    let count=count 
 fi 
 
 echo $count

@@ -1,14 +1,14 @@
-from AMRtools import flatten as flt
+from AMRflatten import flatten as flt
 from BasalMelt import LevermannMask as lvm
 import pandas as pd
 from scipy import ndimage
 import numpy as np
-from matplotlib import pyplot as plt
 
 # To Do:
 # 1. Redo functions so that the regional ones are based on the single ones and that they are shorter
 # 2. Ought to figure out why the resolution is so low in the flattened file
 # 3. Should fix anta to be 1 for all of antarctica
+
 
 class Freshwater:
     """Class for Freshwater input calculation

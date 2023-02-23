@@ -44,6 +44,9 @@ if test -n "$(find $plots -type f -name "plot.$n.??????.2d.hdf5" -print -quit)"
     then
     echo "Found plot, calculating freshwater"
     python3 code/ComputeFreshwater.py ${num} || exit
+    else
+    echo "Something went wrong, no plot"
+    exit 
 fi
 
 echo "Done!"

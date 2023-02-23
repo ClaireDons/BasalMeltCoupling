@@ -44,6 +44,7 @@ class Freshwater:
     """
 
     regions = {"smask0":"anta","smask1":"apen", "smask2":"amun","smask3":"ross","smask4":"eais","smask5":"wedd"}
+    area = 64000000
 
     def __init__(self,flatten,file1,file2):
         self.flatten = flatten
@@ -65,14 +66,16 @@ class Freshwater:
 
     def Calving(self,smb,bmb,vol1,vol2):
         """Discharge Calculation"""
-        div_vol = vol2 -vol1
-        U = (smb + bmb - div_vol)/(10**3)
+        div_h = vol2 -vol1
+        div_vol = div_h * self.area
+        U = (smb + bmb - div_vol)/(10**9)
         return U
 
 
     def BasalMelt(self,var):
         """Basal melt calculation"""
-        bmb =var/(10**3)  
+        div_vol = var * self.area
+        bmb =div_vol/(10**9)  
         return -bmb
 
 

@@ -17,8 +17,8 @@ module load netcdf4-parallel/4.7.4
 export DRIVER=/perm/nlcd/bisicles/BISICLES/code/exec2D/driver2d.Linux.64.mpiCC.mpif90.DEBUG.OPT.MPI.PETSC.ex
 
 # Define input files
-export INFILEBASE="inputs.setup"
-export INFILE=inputs.setup.$SLURM_JOBID
+export INFILEBASE="inputs.ECEbasal"
+export INFILE=inputs.ECEbasal.$SLURM_JOBID
 echo "INFILE = $INFILE"
 cp $INFILEBASE $INFILE
 
@@ -59,3 +59,4 @@ if test -n "$(find $checkpoints -type f -name "chk.$n.??????.2d.hdf5" -print -qu
 fi
 
 srun $DRIVER $INFILE
+touch $SLURM_JOBID.txt

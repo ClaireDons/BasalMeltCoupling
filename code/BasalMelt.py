@@ -479,8 +479,6 @@ class LevermannMask(BasalMelt):
             Netcdfs with basal melt mapped for each Antarctic region
         """
         x,y,bisicles_masks = self.OpenMasks()
-        #bm = BasalMelt()
-        #df2 = self.thetao2basalmelt()
         for i, row in df2.iterrows():
             new_mask = np.where(bisicles_masks['smask1'] == 1, row.apen, bisicles_masks['smask1'])
             new_mask = np.where(bisicles_masks['smask2'] == 1, row.amun, new_mask)

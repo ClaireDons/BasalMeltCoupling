@@ -4,11 +4,6 @@ import pandas as pd
 from scipy import ndimage
 import numpy as np
 
-# To Do:
-# 1. Redo functions so that the regional ones are based on the single ones and that they are shorter
-# 2. Ought to figure out why the resolution is so low in the flattened file
-# 3. Should fix anta to be 1 for all of antarctica
-
 
 class Freshwater:
     """Class for Freshwater input calculation
@@ -53,34 +48,65 @@ class Freshwater:
 
 
     def region(self, mask_path, nc_out, driver):
-        """Get region masks and extract them, not sure I need a function for it"""
+        """Get region masks and extract them
+        Args:
+            mask_path (str): path to amr mask files
+            nc_out (str): path to where netcdf will be stored
+            driver (str): path to BISICLES nc2amr driver
+        Returns:
+            x,y: co-ordinate series 
+            masks:  np.array of Anatrctica sectore masks
+        """
         x,y,masks = lvm(mask_path,nc_out,driver).OpenMasks()
         return x,y,masks
 
 
     def get_sum(self,f):
-        """Get the sum for each variable based on a file"""
+        """Get the sum for each variable based on a file
+        Args:
+            f (str): Name of file to flatten and take sum of
+        Returns:
+            Dataframe with the sum of values for each variable in bisicles netcdf file
+        """
+        
         df = flt(f).sum(self.flatten)
         return df
 
 
     def Calving(self,smb,bmb,vol1,vol2):
-        """Discharge Calculation"""
-        div_h = vol2 -vol1
+        """Discharge Calculation
+        Args:
+            smb (float): surface mass balance
+            bmb (float): basal mass balance
+            vol1, vol2 (float): ice volume at timestep 1 and 2 
+        Returns:
+            Calving discharge for one region (float)
+        """
+        div_h = vol2 -vol1 
         div_vol = div_h * self.area
         U = (smb + bmb - div_vol)/(10**9)
         return U
 
 
-    def BasalMelt(self,var):
-        """Basal melt calculation"""
-        div_vol = var * self.area
-        bmb =div_vol/(10**9)  
-        return -bmb
+    def BasalMelt(self,bmb):
+        """Basal melt calculation
+        Args:
+            bmb (float): basal melt balance in m yr-1 
+        Returns:
+            basal melt in gigatonnes (float)
+        """
+        bmb_vol = bmb * self.area
+        bmb_gt =bmb_vol/(10**9)  
+        return -bmb_gt
 
 
     def AntarcticCalvingContribution(self):
-        """Calving Contribution"""
+        """Extract variables from files to calculate calving Contribution
+        Args:
+            self.file1, self.file2 (str) = BISICLES plot file names at timestep 1 and 2
+        Returns:
+           U (float): Calving contribution in gigatonnes
+        """
         df1 = self.get_sum(self.file1)
         df2 = self.get_sum(self.file2)
         U = self.Calving(df2.activeSurfaceThicknessSource,df2.activeBasalThicknessSource,df1.thickness,df2.thickness)
@@ -88,21 +114,32 @@ class Freshwater:
 
 
     def AntarcticBasalContribution(self):
-        """Basal Melt Contribuition"""
+        """Extract variables from files to calculate basal melt contribuition
+        Args:
+            self.file2 (str): Name of BISICLES plot file
+        Returns:
+            bmb (float): Basal melt contribution in gigatonnes
+        """
         df2 = self.get_sum(self.file2)
         bmb = self.BasalMelt(df2.activeBasalThicknessSource)     
         return bmb
 
 
-    def maskRegion(self,dat, m):
-        """Downsample masks, mask out region, take sum, output to dataframe"""
-        mint = m.astype(int)
+    def maskRegion(self, plot_dat, mask_dat):
+        """Downsample masks, mask out region, take sum, output to dataframe
+        Args:
+            plot_dat (xarray dataset): xarray dataset of BISICLES plot file
+            mask_dat (xarray dataset): xarray dataset of original mask file 
+        Returns:
+            df (pandas dataframe): Dataframe of sum of each variable in BISICLES plot file for a certain region
+        """
+        mint = mask_dat.astype(int)
         new_m = ndimage.interpolation.zoom(mint,0.125)
-        assert dat.thickness.shape == new_m.shape, "arrays are not the same shape"
+        assert plot_dat.thickness.shape == new_m.shape, "arrays are not the same shape"
         cols = []
         sums = []
-        for i in dat:
-            ar = np.array(dat[i])
+        for i in plot_dat:
+            ar = np.array(plot_dat[i])
             r = np.where(new_m == 1, ar, np.nan)
             sum = np.nansum(r)
             cols.append(i)
@@ -115,7 +152,14 @@ class Freshwater:
 
 
     def Contributions(self, dat1, dat2, m):
-        """Calving and Basal melt contribution for each region of Antarctica"""
+        """Calving and Basal melt contribution for a certain region of Antarctica
+        Args:
+            dat1 (xarray dataset): BISICLES plot file timestep 1
+            dat2 (xarray dataset): BISICLES plot file timestep 2
+            m (xarray dataset): mask file of region
+        returns:
+            U (float): Calving contribution in gigatonnes and bmb (float) basal melt contribution in gigatonnes
+        """
         df1 = self.maskRegion(dat1,m)
         df2 = self.maskRegion(dat2,m)
         U = self.Calving(df2.activeSurfaceThicknessSource,df2.activeBasalThicknessSource,df1.thickness,df2.thickness)
@@ -124,7 +168,15 @@ class Freshwater:
 
 
     def RegionalContribution(self,mask_path,nc_out,driver):
-        """Calving and Basal melt contribution for each region of Antarctica"""
+        """Calving and Basal melt contribution for each region of Antarctica
+        Args:
+            mask_path (str): path to mask files
+            nc_out (str): path to netcdf output
+            driver (str): BISICLES nc2amr driver path
+        Returns:
+            discharge_df (pandas dataframe) and basal_df (pandas dataframe): dataframes of calving 
+            and basal melt contribution for all regions of Antarctica
+        """
         x,y,masks = self.region(mask_path,nc_out,driver)
         dat1 = flt(self.file1).open(driver, nc_out)
         dat2 = flt(self.file2).open(driver, nc_out)

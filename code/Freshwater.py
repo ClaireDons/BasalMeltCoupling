@@ -100,31 +100,6 @@ class Freshwater:
         return -bmb_gt
 
 
-    def AntarcticCalvingContribution(self):
-        """Extract variables from files to calculate calving Contribution
-        Args:
-            self.file1, self.file2 (str) = BISICLES plot file names at timestep 1 and 2
-        Returns:
-           U (float): Calving contribution in gigatonnes
-        """
-        df1 = self.get_sum(self.file1)
-        df2 = self.get_sum(self.file2)
-        U = self.Calving(df2.activeSurfaceThicknessSource,df2.activeBasalThicknessSource,df1.thickness,df2.thickness)
-        return U
-
-
-    def AntarcticBasalContribution(self):
-        """Extract variables from files to calculate basal melt contribuition
-        Args:
-            self.file2 (str): Name of BISICLES plot file
-        Returns:
-            bmb (float): Basal melt contribution in gigatonnes
-        """
-        df2 = self.get_sum(self.file2)
-        bmb = self.BasalMelt(df2.activeBasalThicknessSource)     
-        return bmb
-
-
     def maskRegion(self, plot_dat, mask_dat):
         """Downsample masks, mask out region, take sum, output to dataframe
         Args:

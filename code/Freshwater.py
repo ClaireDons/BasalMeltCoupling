@@ -4,12 +4,6 @@ import pandas as pd
 from scipy import ndimage
 import numpy as np
 
-<<<<<<< HEAD
-# To Do:
-# 1. Should fix anta to be 1 for all of antarctica
-
-=======
->>>>>>> 6a55d99a8813ba69a4dac53eb0a8263dbd945c85
 
 class Freshwater:
     """Class for Freshwater input calculation
@@ -48,7 +42,7 @@ class Freshwater:
     area = 64000000
 
     def __init__(self,flatten,file1,file2):
-        self.flatten = flatten
+        self.flatten = flattenß
         self.file1 = file1
         self.file2 = file2
 

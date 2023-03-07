@@ -57,13 +57,25 @@ class OceanData():
         self.thetao = thetao
         self.area = area
 
+    def openDatasets(self):
+        '''Open datasets
+        Args:
+            thetao (str): path to ocean temperature dataset
+            area (str): path to area dataset
+        Returns: 
+            xarray datasets of ocean temperature and area dataset
+        '''
+        ds = xr.open_dataset(self.thetao)
+        area_ds = xr.open_dataset(self.area)
+        return ds, area_ds
+
+
 
     def area_weighted_mean(self, ds_sel,ds_area):
         '''Compute area weighted mean oceanic temperature over specific oceanic sector
         Args:
             ds_var (xarray dataset): thetao dataset
             ds_area (xarray dataset): areacello dataset
-            sector (str): sector name
         Returns:
             area_weighted_mean (dataarray): area weighted mean of thetao
         '''
@@ -72,15 +84,10 @@ class OceanData():
         area_weighted = ds_sel.weighted(area_weights)
         lat = ds_sel.dims[2]
         lon = ds_sel.dims[3]
-        
-        try: 
-            ((lat=='y') or (lat=='j') or (lat=='lat') or (lat=='latitude')) and ((lon=='x') or (lon=='i') or (lon=='lon') or (lon =='longitude'))
-        except:
-            print("Check if these dimensions are correct to compute weighted mean")
 
         area_weighted_mean = area_weighted.mean((lat,lon))
 
-        return area_weighted_mean #2D field: time,levs
+        return area_weighted_mean
 
     def nearest_mask(self, diff):
         """Mask the values outside of target
@@ -198,22 +205,6 @@ class OceanData():
         return lev_weighted_mean
 
 
-    def sector_area_mean(self,ds_var,mask, ds_area):
-        """Compute area mean of sector
-        Args:
-            ds_var (xarray dataset): ocean temperature dataset
-            mask (list): coordinates for masking sector
-            ds_area (xarray dataset): area dataset
-        Reutrns:
-            area_weighted_mean (xarray dataarray): area weighted mean of ocean temperature dataset
-        """
-        ds = xr.open_dataset(self.thetao)
-        ds_sel = levermann(ds).sector_sel(ds_var,mask)
-        #ds_sel = self.sector_sel(ds_var,mask)
-        area_weighted_mean = self.area_weighted_mean(ds_sel, ds_area)
-        return area_weighted_mean
-
-
     def weighted_mean_df(self):
         """ Compute volume weighted mean for one year of thetao
         Args:
@@ -224,19 +215,16 @@ class OceanData():
             df (pandas dataframe): dataframe with volume weighted mean for each sector
         """
         # Open thetao dataset
-        ds = xr.open_dataset(self.thetao)
+        ds, area_ds = self.openDatasets()
         ds_year = ds.groupby('time.year').mean('time') #Compute annual mean
-        ds.close()
-        area_ds = xr.open_dataset(self.area)
         masks = levermann(ds).sector_masks()
-        #sec = LevermannSectors(ds)
-        #masks = sec.sector_masks()
 
         # Loop over oceanic sectors
         df = pd.DataFrame()
         for sector in self.sectors:
             mask = masks[sector]
-            thetaoAWM = self.sector_area_mean(ds_year["thetao"], mask, area_ds)
+            ds_sel = ds_year["thetao"].where(mask)
+            thetaoAWM = self.area_weighted_mean(ds_sel,area_ds)
             thetaoVWM = self.sector_lev_mean(thetaoAWM, ds_year.lev_bnds.mean("year").copy(), sector)
             df[sector] = thetaoVWM
 
@@ -244,6 +232,7 @@ class OceanData():
         area_ds.close()
         return df
     pass
+
 
 class BasalMelt(OceanData):
     """Class for Basal Melt calculation related calculations

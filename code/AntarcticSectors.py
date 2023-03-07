@@ -38,6 +38,7 @@ class LevermannSectors:
     def __init__(self, ds):
         self.ds = ds
 
+
     def create_mask(self,coords):
         """ create a mask based on coordinates
         Args:
@@ -83,15 +84,4 @@ class LevermannSectors:
 
         return masks
 
-
-    def sector_sel(self,ds_var,mask):
-        """Select the region
-        Args:
-            ds_var (xarray data variable): variable to select
-            mask (item): mask of region    
-        Returns:
-            ds_sel: selection of variable based on mask
-        """
-        ds_sel = ds_var.where(mask)
-        return ds_sel
     pass

@@ -177,9 +177,9 @@ class OceanData(LevermannSectors):
     def nearest_mask(self, diff):
         """Mask the values outside of target
         Args:
-            diff ():
+            diff (xarray dataset): 
         Returns:
-            masked_diff (): 
+            masked_diff (xarray dataset): 
         """
         mask = np.ma.less_equal(diff, 0)
         if np.all(mask):
@@ -191,8 +191,8 @@ class OceanData(LevermannSectors):
     def nearest_above(self, my_array, target):
         '''Find nearest value in array that is greater than target value and return corresponding index
         Args:
-            my_array ():
-            target ():
+            my_array (xarray dataset): ocean data array
+            target (float): depth to calculate around
         Returns:
             masked_diff.argmin() ():
         '''
@@ -204,8 +204,8 @@ class OceanData(LevermannSectors):
     def nearest_below(self, my_array, target):
         '''Find nearest value in array that is smaller than target value and return corresponding index
             Args:
-            my_array ():
-            target ():
+            my_array (xarray dataset): ocean data array
+            target (float): depth to calculate around
         Returns:
             masked_diff.argmin() ():
         '''
@@ -213,6 +213,7 @@ class OceanData(LevermannSectors):
         masked_diff = self.nearest_mask(diff)
         return masked_diff.argmin()
 
+    
     def lev_weighted_mean(self, ds,lev_bnds, top, bottom):
         '''Compute volume or depth weighted mean oceanic temperature over specific oceanic
         sector and specific depth layers (centered around ice shelf depth)
@@ -253,7 +254,7 @@ class OceanData(LevermannSectors):
         Args: 
             sector (str): name of sector
         Returns:
-            ocean_slice (): shelfbase slice which is dependent on sector
+            ocean_slice (numpy array): shelfbase slice which is dependent on sector
         '''
 
         shelf_depth = self.find_shelf_depth[sector]
@@ -263,7 +264,12 @@ class OceanData(LevermannSectors):
 
     
     def select_depth_range(self,sector):
-        """Select depth bounds of sector"""
+        """Select depth bounds of sector
+        Args:
+            sector (str): name of sector
+        Returns:
+            top (float) and bottom (float) ocean depth range limits
+        """
         depth_bnds_sector = self.ShelfBase(sector)     
         top = depth_bnds_sector[0]
         bottom = depth_bnds_sector[1]
@@ -271,14 +277,28 @@ class OceanData(LevermannSectors):
     
 
     def sector_lev_mean(self, ds, lev_bnds, sector):
-        """Compute mean of depth bounds"""
+        """Compute mean of depth bounds
+        Args:
+            ds (xarray dataset): ocean temperature dataset
+            lev_bands (array): array of depth level bands
+            sector (str): sector name
+        Returns:
+            lev_weighted_mean (xarray dataarray) depth weighted mean of ocean depth range
+        """
         top, bottom = self.select_depth_range(sector)
         lev_weighted_mean = self.lev_weighted_mean(ds,lev_bnds,top,bottom)
         return lev_weighted_mean
 
 
     def sector_area_mean(self,ds_var,mask, ds_area):
-        """Compute area mean of sector"""
+        """Compute area mean of sector
+        Args:
+            ds_var (xarray dataset): ocean temperature dataset
+            mask (list): coordinates for masking sector
+            ds_area (xarray dataset): area dataset
+        Reutrns:
+            area_weighted_mean (xarray dataarray): area weighted mean of ocean temperature dataset
+        """
         ds_sel = self.sector_sel(ds_var,mask)
         area_weighted_mean = self.area_weighted_mean(ds_sel, ds_area)
         return area_weighted_mean
@@ -353,7 +373,10 @@ class BasalMelt(OceanData):
         self.gamma = gamma
 
     def quad_constant(self):
-        """Calculate quadratic constant"""
+        """Calculate quadratic constant
+        Returns:
+            ms (float) quadratic constant value
+        """
         c_lin = (self.rho_sw*self.c_po)/(self.rho_i*self.L_i)
         c_quad = (c_lin)**2
         ms = self.gamma * 10**5 * c_quad # Quadratic constant
@@ -361,14 +384,25 @@ class BasalMelt(OceanData):
 
 
     def quadBasalMelt(self,dat):
-        """Calculate basal melt"""
+        """Calculate basal melt
+        Args:
+            dat (float): ocean temperature value
+        Returns:
+            bm (float): basal melt value
+        """
         ms = self.quad_constant()
         bm = (dat - self.Tf)*(abs(dat-self.Tf)) * ms
         return bm
 
 
     def BasalMeltAnomalies(self, thetao, base):
-        """Calculate basal melt anomaly"""
+        """Calculate basal melt anomaly
+        Args:
+            thetao (float): ocean temperature value
+            base (float): ocean temperature baseline value
+        Returns:
+            dBM (float) basal melt anomaly
+        """
         BM_base = self.quadBasalMelt(base)
         BM = self.quadBasalMelt(thetao) 
         dBM = BM - BM_base
@@ -378,7 +412,10 @@ class BasalMelt(OceanData):
 
 
     def thetao2basalmelt(self):
-        """Calculate basal melt from 3D ocean temperature file"""
+        """Calculate basal melt from 3D ocean temperature file   
+        Returns:
+            df2 (pandas dataframe) values of basal melt for each Antarctic region
+        """
         df = self.weighted_mean_df()
         df2 =  pd.DataFrame()
         for column in df:
@@ -415,7 +452,10 @@ class LevermannMask(BasalMelt):
         self.driver = driver
         
     def OpenMasks(self):
-        """Open region masks and create dictionary"""
+        """Open region masks and create dictionary
+        Returns:
+            x,y co-ordinate np.array and bisicles_mask (np.array) of each Antarctic region
+        """
         nc_files = glob(os.path.join(self.mask_path, "*.2d.nc"))
         bisicles_masks = {}
         for file in nc_files:
@@ -431,10 +471,14 @@ class LevermannMask(BasalMelt):
 
 
     def map2amr(self,name,df2):
-        """Map basal melt values to corresponding masks and create amr file"""
+        """Map basal melt values to corresponding masks and create amr file
+        Args:
+            name (str): name of output netcdf
+            df2 (pandas dataframe): dataframe of basal melt values
+        Returns:
+            Netcdfs with basal melt mapped for each Antarctic region
+        """
         x,y,bisicles_masks = self.OpenMasks()
-        #bm = BasalMelt()
-        #df2 = self.thetao2basalmelt()
         for i, row in df2.iterrows():
             new_mask = np.where(bisicles_masks['smask1'] == 1, row.apen, bisicles_masks['smask1'])
             new_mask = np.where(bisicles_masks['smask2'] == 1, row.amun, new_mask)
@@ -445,5 +489,3 @@ class LevermannMask(BasalMelt):
             da.to_netcdf(self.nc_out+ name + '.nc')
             os.system(self.driver + " " + self.nc_out + name + ".nc " + self.nc_out + name + ".2d.hdf5 bm")
     pass
-
-'''Maybe should take the driver out of the init function as it isn't relevant for all of the methods'''

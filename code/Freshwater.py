@@ -5,9 +5,7 @@ from scipy import ndimage
 import numpy as np
 
 # To Do:
-# 1. Redo functions so that the regional ones are based on the single ones and that they are shorter
-# 2. Ought to figure out why the resolution is so low in the flattened file
-# 3. Should fix anta to be 1 for all of antarctica
+# 1. Should fix anta to be 1 for all of antarctica
 
 
 class Freshwater:

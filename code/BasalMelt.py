@@ -3,115 +3,10 @@ import xarray as xr
 import pandas as pd
 from glob import glob
 import os
-
-class LevermannSectors:
-    """ Class for Levermann region related calculations
-    ...
-
-    Attributes
-    ----------
-    eais1, eais2 (list): coordinates for east antarctica
-    wedd (list): coordinates for weddel
-    amun (list): coordinates for amundsen
-    ross (list): coordinates for ross
-    apen1,apen2 (list): corrdinates for antarctic peninsula
-    sectors (list): list of region names (str)
-    find_shelf_depth (dict): dictionary containing shelfbase depth for each region
-    ds (xarray dataset): xarray dataset of ocean temperature
-
-    Methods
-    -------
-    create_mask
-        creates mask based on coordinates
-    sector_masks
-        create dictionary of masks
-    sector_sel
-        select a region
-    """
-
-    eais1 = [-76,-65,0,173]
-    eais2 = [-76,-65,350,0]
-    wedd = [-90,-72,295,350]
-    amun = [-90,-70,210,295]
-    ross = [-90,-76,150,210]
-    apen1 = [-70,-65,294,310]
-    apen2 = [-75,-70,285,295]
-
-    # Sectors
-    sectors = ['eais','wedd','amun','ross','apen']
-
-    # Sector-specific depths (based on shelf base depth)
-    find_shelf_depth = {
-    'eais': 369,
-    'wedd': 420,
-    'amun': 305,
-    'ross': 312,
-    'apen': 420
-    }
-
-    def __init__(self, ds):
-        self.ds = ds
-
-    def create_mask(self,coords):
-        """ create a mask based on coordinates
-        Args:
-            ds (xarray dataset): thetao dataset
-            lat1,lat2,lon1,lon2 (int): coordinates of sector
-        Returns:
-            mask (item): mask of sector
-        """
-        try:
-            lat='latitude'
-            lon='longitude'
-        except:
-            lat='lat'
-            lon='lon'
-
-        mask = ((self.ds.coords[lat] > coords[0])
-            & (self.ds.coords[lat] < coords[1])
-            & (self.ds.coords[lon] > coords[2])
-            & (self.ds.coords[lon] < coords[3])
-        )
-        return mask
-
-    def sector_masks(self):
-        '''select mask of sector
-        Args:
-            ds (xarray dataset): thetao dataset
-            sector (str): sector name
-        Returns:
-            mask (item): mask of sector
-        '''
-
-        mask_eais = self.create_mask(self.eais1)     
-        + self.create_mask(self.eais2)
-        mask_wedd = self.create_mask(self.wedd)
-        mask_amun = self.create_mask(self.amun)
-        mask_ross = self.create_mask(self.ross)
-        mask_apen = self.create_mask(self.apen1) 
-        + self.create_mask(self.apen2)
-        masks = {'eais': mask_eais, 'wedd': mask_wedd,  
-        'amun': mask_amun, 'ross': mask_ross, 'apen': mask_apen}
-
-        assert len(masks) == 5, "There should be 5 regions"
-
-        return masks
+from AntarcticSectors import LevermannSectors as levermann
 
 
-    def sector_sel(self,ds_var,mask):
-        """Select the region
-        Args:
-            ds_var (xarray data variable): variable to select
-            mask (item): mask of region    
-        Returns:
-            ds_sel: selection of variable based on mask
-        """
-        ds_sel = ds_var.where(mask)
-        return ds_sel
-    pass
-
-
-class OceanData(LevermannSectors):
+class OceanData():
     """Class of ocean output file related calculations
     ...
 
@@ -144,6 +39,19 @@ class OceanData(LevermannSectors):
     weighted_mean_df
         Compute volume weighted mean for one year of thetao
     """
+
+     # Sectors
+    sectors = ['eais','wedd','amun','ross','apen']
+
+    # Sector-specific depths (based on shelf base depth)
+    find_shelf_depth = {
+    'eais': 369,
+    'wedd': 420,
+    'amun': 305,
+    'ross': 312,
+    'apen': 420
+    }
+
 
     def __init__(self,thetao,area):
         self.thetao = thetao
@@ -299,7 +207,9 @@ class OceanData(LevermannSectors):
         Reutrns:
             area_weighted_mean (xarray dataarray): area weighted mean of ocean temperature dataset
         """
-        ds_sel = self.sector_sel(ds_var,mask)
+        ds = xr.open_dataset(self.thetao)
+        ds_sel = levermann(ds).sector_sel(ds_var,mask)
+        #ds_sel = self.sector_sel(ds_var,mask)
         area_weighted_mean = self.area_weighted_mean(ds_sel, ds_area)
         return area_weighted_mean
 
@@ -318,8 +228,9 @@ class OceanData(LevermannSectors):
         ds_year = ds.groupby('time.year').mean('time') #Compute annual mean
         ds.close()
         area_ds = xr.open_dataset(self.area)
-        sec = LevermannSectors(ds)
-        masks = sec.sector_masks()
+        masks = levermann(ds).sector_masks()
+        #sec = LevermannSectors(ds)
+        #masks = sec.sector_masks()
 
         # Loop over oceanic sectors
         df = pd.DataFrame()

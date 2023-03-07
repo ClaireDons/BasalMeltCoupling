@@ -42,7 +42,7 @@ class Freshwater:
     area = 64000000
 
     def __init__(self,flatten,file1,file2):
-        self.flatten = flattenß
+        self.flatten = flatten
         self.file1 = file1
         self.file2 = file2
 

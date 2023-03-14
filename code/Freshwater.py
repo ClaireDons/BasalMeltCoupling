@@ -38,7 +38,6 @@ class Freshwater:
         Calving and Basal melt contribution for each region of Antarctica
     """
 
-    regions = {"anta":"anta","apen":"apen", "amun":"amun","ross":"ross","eais":"eais","wedd":"wedd"}
     area = 64000000
 
     def __init__(self,flatten,file1,file2):
@@ -156,7 +155,6 @@ class Freshwater:
         discharge = {}
         basal = {}
         for key, m in masks.items():
-            #reg = self.regions.get(key)
             U,bmb = self.Contributions(dat1,dat2,m)
             discharge[key] = U
             basal[key] = bmb

@@ -23,7 +23,7 @@ mask_path = path + "inputs/levermann_masks/"
 nc_out = path
 
 # Load leverman masks (Maybe in future should just be replaces with coordinates)
-driver = '/perm/nlcd/bisicles/BISICLES/code/filetools/nctoamr2d.Linux.64.mpiCC.gfortran.DEBUG.MPI.ex' # nc to amr hdf5 tool 
+driver = '/perm/nlcd/ecearth3-bisicles/r9411-cmip6-bisicles-knmi/sources/BISICLES/code/filetools/nctoamr2d.Linux.64.mpiCC.mpif90.DEBUG.OPT.MPI.PETSC.ex' # nc to amr hdf5 tool 
 
 # Calculate basal melt
 OceanTemp = BM.BasalMelt(thetao_file,area_file,gamma)

@@ -20,8 +20,8 @@ nc_out = path + "outputs/plots/nc/"
 plot_path = path + "outputs/plots/hdf5/"
 
 # Define parameters
-filetoolsPath = r'/perm/nlcd/bisicles/BISICLES/code/filetools/'
-filetoolFlatten = 'flatten2d.Linux.64.mpiCC.gfortran.DEBUG.MPI.ex'
+filetoolsPath = r'/perm/nlcd/ecearth3-bisicles/r9411-cmip6-bisicles-knmi/sources/BISICLES/code/filetools/'
+filetoolFlatten = 'flatten2d.Linux.64.mpiCC.mpif90.DEBUG.OPT.MPI.PETSC.ex'
 flatten = filetoolsPath + filetoolFlatten
 
 PenultimateFile = sorted(iglob(plot_path + "*.2d.hdf5"), reverse = True)[1]

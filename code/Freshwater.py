@@ -1,5 +1,5 @@
-from AMRflatten import flatten as flt
-from BasalMelt import LevermannMask as lvm
+from AMRtools import flatten as flt
+from AMRtools import masks as bisi_masks
 import pandas as pd
 from scipy import ndimage
 import numpy as np
@@ -38,7 +38,7 @@ class Freshwater:
         Calving and Basal melt contribution for each region of Antarctica
     """
 
-    regions = {"smask0":"anta","smask1":"apen", "smask2":"amun","smask3":"ross","smask4":"eais","smask5":"wedd"}
+    regions = {"anta":"anta","apen":"apen", "amun":"amun","ross":"ross","eais":"eais","wedd":"wedd"}
     area = 64000000
 
     def __init__(self,flatten,file1,file2):
@@ -47,17 +47,15 @@ class Freshwater:
         self.file2 = file2
 
 
-    def region(self, mask_path, nc_out, driver):
+    def region(self, mask_path):
         """Get region masks and extract them
         Args:
             mask_path (str): path to amr mask files
-            nc_out (str): path to where netcdf will be stored
-            driver (str): path to BISICLES nc2amr driver
         Returns:
             x,y: co-ordinate series 
             masks:  np.array of Anatrctica sectore masks
         """
-        x,y,masks = lvm(mask_path,nc_out,driver).OpenMasks()
+        x,y,masks = bisi_masks(mask_path).bisicles_masks()
         return x,y,masks
 
 
@@ -152,7 +150,7 @@ class Freshwater:
             discharge_df (pandas dataframe) and basal_df (pandas dataframe): dataframes of calving 
             and basal melt contribution for all regions of Antarctica
         """
-        x,y,masks = self.region(mask_path,nc_out,driver)
+        x,y,masks = self.region(mask_path)
         dat1 = flt(self.file1).open(driver, nc_out)
         dat2 = flt(self.file2).open(driver, nc_out)
         discharge = {}

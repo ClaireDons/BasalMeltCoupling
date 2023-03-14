@@ -27,10 +27,6 @@ driver = '/perm/nlcd/bisicles/BISICLES/code/filetools/nctoamr2d.Linux.64.mpiCC.g
 
 # Calculate basal melt
 OceanTemp = BM.BasalMelt(thetao_file,area_file,gamma)
-melt = OceanTemp.thetao2basalmelt()
+OceanTemp.mapBasalMelt(mask_path,nc_out,driver,name)
 
-
-# Open ncfiles and create masks for BISICLES
-Levermann = BM.LevermannMask(mask_path,nc_out,driver)
-Levermann.map2amr(name,melt)
 print("Basal Melt Calculated")

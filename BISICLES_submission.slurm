@@ -14,7 +14,6 @@ module load hdf5-parallel/1.10.6
 module load netcdf4-parallel/4.7.4
 
 # Define driver 
-#export DRIVER=/perm/nlcd/bisicles/BISICLES/code/exec2D/driver2d.Linux.64.mpiCC.mpif90.DEBUG.OPT.MPI.PETSC.ex
 export DRIVER=/perm/nlcd/ecearth3-bisicles/r9411-cmip6-bisicles-knmi/sources/BISICLES/code/exec2D/driver2d.Linux.64.mpiCC.mpif90.DEBUG.OPT.MPI.PETSC.ex
 # Define input files
 export INFILEBASE="inputs.ECEbasal"

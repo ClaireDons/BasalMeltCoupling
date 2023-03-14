@@ -23,7 +23,7 @@ bm=basal_melt.2d.hdf5
 ### 4. Run basal melt python script    
 python3 code/ComputeBasalMelt.py ${num} || exit
 
-### 5. Define new basal melt values in input file
+### 5. Define new basal melt values in input files
 export COUPLED=BISICLES_submission.slurm
 cp $SH_BISICLES $COUPLED
 sed -i s/@melt/$bm/ $COUPLED

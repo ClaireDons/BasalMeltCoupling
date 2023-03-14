@@ -1,8 +1,6 @@
 import numpy as np
 import xarray as xr
 import pandas as pd
-from glob import glob
-import os
 from AntarcticSectors import LevermannSectors as levermann
 
 
@@ -217,7 +215,7 @@ class OceanData():
         # Open thetao dataset
         ds, area_ds = self.openDatasets()
         ds_year = ds.groupby('time.year').mean('time') #Compute annual mean
-        masks = levermann(ds).sector_masks()
+        masks = levermann().sector_masks(ds)
 
         # Loop over oceanic sectors
         df = pd.DataFrame()
@@ -258,6 +256,8 @@ class BasalMelt(OceanData):
         Calculate basal melt anomaly
     thetao2basalmelt
         Calculate basal melt from 3D ocean temperature file
+    mapBasalMelt
+        Map basal melt values to Antarctic Sectors
     """
 
     # Parameters to compute basal ice shelf melt (Favier 2019)
@@ -326,66 +326,19 @@ class BasalMelt(OceanData):
         assert df2.empty == False, "Dataframe should not be empty"
         print(df2)
         return df2
-    pass
 
-
-class LevermannMask(BasalMelt):
-    """Class for Basal Melt calculation of Levermann regions
-    ...
-
-    Attributes
-    ----------
-    mask_path (str): Path to mask files
-    nc_out (str): Path to where nc files need to be output
-    driver (str): Path to where nc2amr driver
-
-    Methods
-    -------
-    OpenMasks
-        Open region masks and create dictionary
-    map2amr
-        Map basal melt values to corresponding masks and create amr file
-    """
-    def __init__(self,mask_path,nc_out,driver):
-        self.mask_path = mask_path
-        self.nc_out = nc_out
-        self.driver = driver
-        
-    def OpenMasks(self):
-        """Open region masks and create dictionary
-        Returns:
-            x,y co-ordinate np.array and bisicles_mask (np.array) of each Antarctic region
-        """
-        nc_files = glob(os.path.join(self.mask_path, "*.2d.nc"))
-        bisicles_masks = {}
-        for file in nc_files:
-            key = os.path.splitext(os.path.basename(file))[0][15:-3]
-            name = 'smask' + str(key)
-            dat = xr.open_dataset(file)
-            bisicles_masks[name] = np.array(dat['smask'])
-        assert len(bisicles_masks) != 0, "Dictionary should not be empty"
-
-        x = np.array(dat['x'])
-        y = np.array(dat['y'])
-        return x,y,bisicles_masks
-
-
-    def map2amr(self,name,df2):
-        """Map basal melt values to corresponding masks and create amr file
+    def mapBasalMelt(self,mask_path,nc_out,driver,name):
+        """Calculate basal melt values and map to Antarctic sectors
         Args:
-            name (str): name of output netcdf
-            df2 (pandas dataframe): dataframe of basal melt values
+            mask_path (str): path to mask files
+            nc_out (str): path to where basal melt file will be output
+            driver (str): path to filetools driver
+            name (str): name of basal melt file
         Returns:
-            Netcdfs with basal melt mapped for each Antarctic region
+            basal melt dataframe and produces netcdf and hdf5 files
         """
-        x,y,bisicles_masks = self.OpenMasks()
-        for i, row in df2.iterrows():
-            new_mask = np.where(bisicles_masks['smask1'] == 1, row.apen, bisicles_masks['smask1'])
-            new_mask = np.where(bisicles_masks['smask2'] == 1, row.amun, new_mask)
-            new_mask = np.where(bisicles_masks['smask3'] == 1, row.ross, new_mask)
-            new_mask = np.where(bisicles_masks['smask4'] == 1, row.eais, new_mask)
-            new_mask = np.where(bisicles_masks['smask5'] == 1, row.wedd, new_mask)
-            da = xr.DataArray(data= new_mask, coords=[("x", x),("y",y)], name="bm")
-            da.to_netcdf(self.nc_out+ name + '.nc')
-            os.system(self.driver + " " + self.nc_out + name + ".nc " + self.nc_out + name + ".2d.hdf5 bm")
+        df = self.thetao2basalmelt()
+        levermann().map2amr(mask_path,nc_out,driver,name,df)
+        return df
+
     pass

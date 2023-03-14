@@ -2,6 +2,8 @@ import os
 import subprocess
 import pandas as pd
 import xarray as xr
+import numpy as np
+from glob import glob
 
 
 class flatten:
@@ -132,3 +134,27 @@ class flatten:
         return df
 
     pass  
+
+class masks:
+    def __init__(self, path):
+        self.path = path
+
+    def bisicles_masks(self):
+        """Open region masks and create dictionary
+        Returns:
+            x,y co-ordinate np.array and bisicles_mask (np.array) of each Antarctic region
+        """
+        nc_files = glob(os.path.join(self.path, "*.2d.nc"))
+        bisicles_masks = {}
+        for file in nc_files:
+            key = os.path.splitext(os.path.basename(file))[0][10:-5]
+            name = str(key)
+            dat = xr.open_dataset(file)
+            bisicles_masks[name] = np.array(dat['smask'])
+        assert len(bisicles_masks) != 0, "Dictionary should not be empty"
+
+        x = np.array(dat['x'])
+        y = np.array(dat['y'])
+        return x,y,bisicles_masks
+
+    pass

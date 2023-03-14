@@ -156,10 +156,10 @@ class Freshwater:
         discharge = {}
         basal = {}
         for key, m in masks.items():
-            reg = self.regions.get(key)
+            #reg = self.regions.get(key)
             U,bmb = self.Contributions(dat1,dat2,m)
-            discharge[reg] = U
-            basal[reg] = bmb
+            discharge[key] = U
+            basal[key] = bmb
         discharge_df = pd.DataFrame.from_dict(discharge)
         basal_df = pd.DataFrame.from_dict(basal)
         return discharge_df, basal_df

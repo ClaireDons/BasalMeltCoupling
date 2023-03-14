@@ -18,8 +18,6 @@ class Freshwater:
 
     Methods
     -------
-    region
-        Get region masks and extract them
     get_sum
         Get the sum for each variable based on a file
     Calving

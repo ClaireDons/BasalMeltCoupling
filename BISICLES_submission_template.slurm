@@ -22,7 +22,7 @@ echo "INFILE = $INFILE"
 cp $INFILEBASE $INFILE
 
 n=coupled_bm
-checkpoints=/ec/res4/scratch/nlcd/CMIP6/bm_coupling/outputs/checkpoints
+checkpoints=/ec/res4/scratch/nlcd/CMIP6/BasalMeltCoupling/outputs/checkpoints
 bm=@melt
 
 # Count the number of checkpoints to increase time to run to incrementally 

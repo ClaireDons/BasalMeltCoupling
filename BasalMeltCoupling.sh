@@ -15,7 +15,7 @@ export LD_LIBRARY_PATH=$HDF5_PARALLEL_DIR/lib:$PYTHON3_DIR/lib:$LD_LIBRARY_PATH
 # 3. Define names and paths needed
 n=coupled_bm
 NC_PLOT=plot.$n.nc
-plots=/ec/res4/scratch/nlcd/CMIP6/bm_coupling/outputs/plots/hdf5/
+plots=/ec/res4/scratch/nlcd/CMIP6/BasalMeltCoupling/outputs/plots/hdf5/
 FLATTEN="/perm/nlcd/bisicles/BISICLES/code/filetools/flatten2d.Linux.64.mpiCC.gfortran.DEBUG.MPI.ex"
 SH_BISICLES="BISICLES_submission_template.slurm"
 bm=basal_melt.2d.hdf5 

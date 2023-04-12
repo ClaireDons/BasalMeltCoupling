@@ -12,7 +12,7 @@ Requires the BasalMelt module.
 from FwCoupling import BasalMelt as BM
 
 # Define parameters
-path = "/ec/res4/scratch/nlcd/CMIP6/bm_coupling/"
+path = "/ec/res4/scratch/nlcd/CMIP6/BasalMeltCoupling/"
 area_file = path + "inputs/ec-earth_data/areacello_Ofx_EC-Earth3_historical_r1i1p1f1_gn.nc"
 thetao_file = path + "inputs/ec-earth_data/thetao_Omon_EC-Earth3_historical_r1i1p1f1_gn_201401-201412.nc"
 gamma = 0.05

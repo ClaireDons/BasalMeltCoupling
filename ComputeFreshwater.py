@@ -10,11 +10,11 @@ Requires the Freshwater modules and glob
 
 from FwCoupling import Freshwater as FW
 from glob import iglob
-import pandas as pd
+#import pandas as pd
 
 
 # Define paths
-path =  "/ec/res4/scratch/nlcd/CMIP6/bm_coupling/"
+path =  "/ec/res4/scratch/nlcd/CMIP6/BasalMeltCoupling/"
 mask_path = path + "inputs/levermann_masks/"
 nc_out = path + "outputs/plots/nc/"
 plot_path = path + "outputs/plots/hdf5/"

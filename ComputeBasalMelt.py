@@ -26,7 +26,8 @@ nc_out = path
 driver = '/perm/nlcd/ecearth3-bisicles/r9411-cmip6-bisicles-knmi/sources/BISICLES/code/filetools/nctoamr2d.Linux.64.mpiCC.mpif90.DEBUG.OPT.MPI.PETSC.ex' # nc to amr hdf5 tool 
 
 # Calculate basal melt
-OceanTemp = BM.BasalMelt(thetao_file,area_file,gamma)
-OceanTemp.mapBasalMelt(mask_path,nc_out,driver,name)
+if __name__ == "__main__":
+    OceanTemp = BM.BasalMelt(thetao_file,area_file,gamma)
+    OceanTemp.mapBasalMelt(mask_path,nc_out,driver,name)
 
-print("Basal Melt Calculated")
+    print("Basal Melt Calculated")

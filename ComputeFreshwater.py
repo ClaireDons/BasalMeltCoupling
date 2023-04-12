@@ -8,9 +8,8 @@ BISICLES flatten tool.
 Requires the Freshwater modules and glob
 """
 
-from FwCoupling import Freshwater as FW
 from glob import iglob
-#import pandas as pd
+from FwCoupling import Freshwater as FW
 
 
 # Define paths
@@ -24,15 +23,16 @@ filetoolsPath = r'/perm/nlcd/ecearth3-bisicles/r9411-cmip6-bisicles-knmi/sources
 filetoolFlatten = 'flatten2d.Linux.64.mpiCC.mpif90.DEBUG.OPT.MPI.PETSC.ex'
 flatten = filetoolsPath + filetoolFlatten
 
-PenultimateFile = sorted(iglob(plot_path + "*.2d.hdf5"), reverse = True)[1]
-LatestFile = sorted(iglob(plot_path + "*.2d.hdf5"), reverse = True)[0]
-print(PenultimateFile)
-print(LatestFile)
 
+if __name__ == "__main__":
+    PenultimateFile = sorted(iglob(plot_path + "*.2d.hdf5"), reverse = True)[1]
+    LatestFile = sorted(iglob(plot_path + "*.2d.hdf5"), reverse = True)[0]
+    print(PenultimateFile)
+    print(LatestFile)
 
-fw = FW.Freshwater(flatten, PenultimateFile, LatestFile)
-discharge, basal = fw.RegionalContribution(mask_path,nc_out,flatten)
-discharge.to_csv("outputs/csv/discharge.csv", index=False)
-basal.to_csv("outputs/csv/basal.csv", index=False)
-print(discharge)
-print(basal)
+    fw = FW.Freshwater(flatten, PenultimateFile, LatestFile)
+    discharge, basal = fw.RegionalContribution(mask_path,nc_out,flatten)
+    discharge.to_csv("outputs/csv/discharge.csv", index=False)
+    basal.to_csv("outputs/csv/basal.csv", index=False)
+    print(discharge)
+    print(basal)

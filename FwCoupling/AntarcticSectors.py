@@ -1,6 +1,12 @@
+'''
+This module contains classes for different types of Antarctic Sectors
+
+Classes: LevermannSectors
+'''
+
+import os
 import numpy as np
 import xarray as xr
-import os
 from FwCoupling.AMRtools import masks as bisi_masks
 
 class LevermannSectors:
@@ -28,16 +34,16 @@ class LevermannSectors:
         select a region
     """
 
-    eais1 = [-76,-65,0,173]
-    eais2 = [-76,-65,350,0]
-    wedd = [-90,-72,295,350]
-    amun = [-90,-70,210,295]
-    ross = [-90,-76,150,210]
-    apen1 = [-70,-65,294,310]
-    apen2 = [-75,-70,285,295]
+    eais1 = [-76, -65, 0, 173]
+    eais2 = [-76, -65, 350, 0]
+    wedd = [-90, -72, 295, 350]
+    amun = [-90, -70, 210, 295]
+    ross = [-90, -76, 150, 210]
+    apen1 = [-70, -65, 294, 310]
+    apen2 = [-75, -70, 285, 295]
 
 
-    def create_mask(self,ds,coords):
+    def create_mask(self, ds, coords):
         """ create a mask based on coordinates
         Args:
             ds (xarray dataset): thetao dataset
@@ -68,15 +74,12 @@ class LevermannSectors:
             mask (item): mask of sector
         '''
 
-        mask_eais = self.create_mask(ds, self.eais1)     
-        + self.create_mask(ds, self.eais2)
+        mask_eais = self.create_mask(ds, self.eais1) + self.create_mask(ds, self.eais2)
         mask_wedd = self.create_mask(ds, self.wedd)
         mask_amun = self.create_mask(ds, self.amun)
         mask_ross = self.create_mask(ds, self.ross)
-        mask_apen = self.create_mask(ds, self.apen1) 
-        + self.create_mask(ds, self.apen2)
-        masks = {'eais': mask_eais, 'wedd': mask_wedd,  
-        'amun': mask_amun, 'ross': mask_ross, 'apen': mask_apen}
+        mask_apen = self.create_mask(ds, self.apen1) + self.create_mask(ds, self.apen2)
+        masks = {'eais': mask_eais, 'wedd': mask_wedd, 'amun': mask_amun, 'ross': mask_ross, 'apen': mask_apen}
 
         assert len(masks) == 5, "There should be 5 regions"
 
@@ -93,7 +96,7 @@ class LevermannSectors:
             Netcdf and amr file with basal melt mapped for each Levermann region
         """
 
-        x,y,bisicles_masks = bisi_masks(mask_path).bisicles_masks()
+        x, y, bisicles_masks = bisi_masks(mask_path).bisicles_masks()
 
         for i, row in df.iterrows():
             new_mask = np.where(bisicles_masks['apen'] == 1, row.apen, bisicles_masks['apen'])

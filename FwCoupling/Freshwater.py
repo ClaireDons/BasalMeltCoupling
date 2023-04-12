@@ -1,5 +1,5 @@
-from AMRtools import flatten as flt
-from AMRtools import masks as bisi_masks
+from FwCoupling.AMRtools import flatten as flt
+from FwCoupling.AMRtools import masks as bisi_masks
 import pandas as pd
 from scipy import ndimage
 import numpy as np

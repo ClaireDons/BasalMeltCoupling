@@ -9,7 +9,7 @@ path to levermann region maks, chosen gamma value and path to bisisles nc2amr to
 Requires the BasalMelt module.
 """
 
-import BasalMelt as BM
+from FwCoupling import BasalMelt as BM
 
 # Define parameters
 path = "/ec/res4/scratch/nlcd/CMIP6/bm_coupling/"

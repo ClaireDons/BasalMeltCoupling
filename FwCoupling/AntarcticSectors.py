@@ -1,7 +1,7 @@
 import numpy as np
 import xarray as xr
 import os
-from AMRtools import masks as bisi_masks
+from FwCoupling.AMRtools import masks as bisi_masks
 
 class LevermannSectors:
     """ Class for Levermann region related calculations

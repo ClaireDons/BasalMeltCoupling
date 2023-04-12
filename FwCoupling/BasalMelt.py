@@ -1,7 +1,7 @@
 import numpy as np
 import xarray as xr
 import pandas as pd
-from AntarcticSectors import LevermannSectors as levermann
+from FwCoupling.AntarcticSectors import LevermannSectors as levermann
 
 
 class OceanData():

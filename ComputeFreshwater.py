@@ -8,7 +8,7 @@ BISICLES flatten tool.
 Requires the Freshwater modules and glob
 """
 
-import Freshwater as FW
+from FwCoupling import Freshwater as FW
 from glob import iglob
 import pandas as pd
 

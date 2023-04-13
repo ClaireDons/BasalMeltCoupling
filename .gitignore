@@ -279,3 +279,6 @@ pout.*
 slurm-*
 inputs.ECEbasal.*
 ecsbatch.log.*
+
+# other
+pyvenv.cfg

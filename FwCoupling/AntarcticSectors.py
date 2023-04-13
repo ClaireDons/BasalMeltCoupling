@@ -51,12 +51,9 @@ class LevermannSectors:
         Returns:
             mask (item): mask of sector
         """
-        try:
-            lat='latitude'
-            lon='longitude'
-        except:
-            lat='lat'
-            lon='lon'
+
+        lat = 'latitude'
+        lon = 'longitude'
 
         mask = ((ds.coords[lat] > coords[0])
             & (ds.coords[lat] < coords[1])
@@ -81,6 +78,7 @@ class LevermannSectors:
         mask_apen = self.create_mask(ds, self.apen1) + self.create_mask(ds, self.apen2)
         masks = {'eais': mask_eais, 'wedd': mask_wedd, 'amun': mask_amun, 'ross': mask_ross, 'apen': mask_apen}
 
+
         assert len(masks) == 5, "There should be 5 regions"
 
         return masks
@@ -104,9 +102,7 @@ class LevermannSectors:
             new_mask = np.where(bisicles_masks['ross'] == 1, row.ross, new_mask)
             new_mask = np.where(bisicles_masks['eais'] == 1, row.eais, new_mask)
             new_mask = np.where(bisicles_masks['wedd'] == 1, row.wedd, new_mask)
-            da = xr.DataArray(data= new_mask, coords=[("x", x),("y",y)], name="bm")
-            da.to_netcdf(nc_out+ name + '.nc')
+            da = xr.DataArray(data=new_mask, coords=[("x", x), ("y", y)], name="bm")
+            da.to_netcdf(nc_out + name + '.nc')
             os.system(driver + " " + nc_out + name + ".nc " + nc_out + name + ".2d.hdf5 bm")
     pass
-
- 

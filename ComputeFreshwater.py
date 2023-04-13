@@ -13,25 +13,25 @@ from FwCoupling import Freshwater as FW
 
 
 # Define paths
-path =  "/ec/res4/scratch/nlcd/CMIP6/BasalMeltCoupling/"
+path = "/ec/res4/scratch/nlcd/CMIP6/BasalMeltCoupling/"
 mask_path = path + "inputs/levermann_masks/"
 nc_out = path + "outputs/plots/nc/"
 plot_path = path + "outputs/plots/hdf5/"
 
 # Define parameters
-filetoolsPath = r'/perm/nlcd/ecearth3-bisicles/r9411-cmip6-bisicles-knmi/sources/BISICLES/code/filetools/'
-filetoolFlatten = 'flatten2d.Linux.64.mpiCC.mpif90.DEBUG.OPT.MPI.PETSC.ex'
+filetoolsPath = r"/perm/nlcd/ecearth3-bisicles/r9411-cmip6-bisicles-knmi/sources/BISICLES/code/filetools/"
+filetoolFlatten = "flatten2d.Linux.64.mpiCC.mpif90.DEBUG.OPT.MPI.PETSC.ex"
 flatten = filetoolsPath + filetoolFlatten
 
 
 if __name__ == "__main__":
-    PenultimateFile = sorted(iglob(plot_path + "*.2d.hdf5"), reverse = True)[1]
-    LatestFile = sorted(iglob(plot_path + "*.2d.hdf5"), reverse = True)[0]
+    PenultimateFile = sorted(iglob(plot_path + "*.2d.hdf5"), reverse=True)[1]
+    LatestFile = sorted(iglob(plot_path + "*.2d.hdf5"), reverse=True)[0]
     print(PenultimateFile)
     print(LatestFile)
 
     fw = FW.Freshwater(flatten, PenultimateFile, LatestFile)
-    discharge, basal = fw.RegionalContribution(mask_path,nc_out,flatten)
+    discharge, basal = fw.RegionalContribution(mask_path, nc_out, flatten)
     discharge.to_csv("outputs/csv/discharge.csv", index=False)
     basal.to_csv("outputs/csv/basal.csv", index=False)
     print(discharge)

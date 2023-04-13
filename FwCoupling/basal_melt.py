@@ -1,5 +1,7 @@
 """ This module is for calculating basal melt based on
 ocean temperature from EC-Earth.
+
+Classes: OceanData, BasalMelt
 """
 
 import numpy as np

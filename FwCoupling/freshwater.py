@@ -1,5 +1,7 @@
 """This module contains the methods and attributes for freshwater
 calculations for different regions of Antarctica
+
+Classes: Freshwater
 """
 
 import numpy as np
@@ -58,7 +60,7 @@ class Freshwater:
         x, y, masks = bisi_masks(mask_path).bisicles_masks()
         return x, y, masks
 
-    def get_sum(self, f):
+    def get_sum(self, file):
         """Get the sum for each variable based on a file
         Args:
             f (str): Name of file to flatten and take sum of
@@ -67,8 +69,8 @@ class Freshwater:
             in bisicles netcdf file
         """
 
-        df = flt(f).sum(self.flatten)
-        return df
+        sum_df = flt(file).sum(self.flatten)
+        return sum_df
 
     def calving(self, smb, bmb, vol1, vol2):
         """Discharge Calculation
@@ -81,8 +83,8 @@ class Freshwater:
         """
         div_h = vol2 - vol1
         div_vol = div_h * self.area
-        U = (smb + bmb - div_vol) / (10**9)
-        return U
+        calving_flux = (smb + bmb - div_vol) / (10**9)
+        return calving_flux
 
     def basal_melt(self, bmb):
         """Basal melt calculation
@@ -104,44 +106,44 @@ class Freshwater:
             df (pandas dataframe): Dataframe of sum of each variable in
             BISICLES plot file for a certain region
         """
-        mint = mask_dat.astype(int)
-        new_m = ndimage.interpolation.zoom(mint, 0.125)
-        assert plot_dat.thickness.shape == new_m.shape, "arrays are not the same shape"
+        mask_int = mask_dat.astype(int)
+        new_mask = ndimage.interpolation.zoom(mask_int, 0.125)
+        assert plot_dat.thickness.shape == new_mask.shape, "arrays are not the same shape"
         cols = []
         sums = []
         for i in plot_dat:
-            ar = np.array(plot_dat[i])
-            r = np.where(new_m == 1, ar, np.nan)
-            sum = np.nansum(r)
+            area = np.array(plot_dat[i])
+            mask_area = np.where(new_mask == 1, area, np.nan)
+            mask_sum = np.nansum(mask_area)
             cols.append(i)
-            sums.append(sum)
-        df = pd.DataFrame(columns=cols)
-        series = pd.Series(sums, index=df.columns)
-        df = df.append(series, ignore_index=True)
-        assert df.empty is False, "Dataframe is empty"
-        return df
+            sums.append(mask_sum)
+        sum_df = pd.DataFrame(columns=cols)
+        series = pd.Series(sums, index=sum_df.columns)
+        sum_df = sum_df.append(series, ignore_index=True)
+        assert sum_df.empty is False, "Dataframe is empty"
+        return sum_df
 
-    def contributions(self, dat1, dat2, m):
+    def contributions(self, dat1, dat2, mask_file):
         """Calving and Basal melt contribution for a certain region of
         Antarctica
         Args:
             dat1 (xarray dataset): BISICLES plot file timestep 1
             dat2 (xarray dataset): BISICLES plot file timestep 2
-            m (xarray dataset): mask file of region
+            mask_file (xarray dataset): mask file of region
         returns:
-            U (float): Calving contribution in gigatonnes and bmb (float)
+            calving_flux (float): Calving contribution in gigatonnes and bmb (float)
             basal melt contribution in gigatonnes
         """
-        df1 = self.mask_region(dat1, m)
-        df2 = self.mask_region(dat2, m)
-        U = self.calving(
+        df1 = self.mask_region(dat1, mask_file)
+        df2 = self.mask_region(dat2, mask_file)
+        calving_flux = self.calving(
             df2.activeSurfaceThicknessSource,
             df2.activeBasalThicknessSource,
             df1.thickness,
             df2.thickness,
         )
         bmb = self.basal_melt(df2.activeBasalThicknessSource)
-        return U, bmb
+        return calving_flux, bmb
 
     def regional_contribution(self, mask_path, nc_out, driver):
         """Calving and Basal melt contribution for each region of Antarctica
@@ -159,9 +161,9 @@ class Freshwater:
         dat2 = flt(self.file2).open(driver, nc_out)
         discharge = {}
         basal = {}
-        for key, m in masks.items():
-            U, bmb = self.contributions(dat1, dat2, m)
-            discharge[key] = U
+        for key, mask in masks.items():
+            calving_flux, bmb = self.contributions(dat1, dat2, mask)
+            discharge[key] = calving_flux
             basal[key] = bmb
         discharge_df = pd.DataFrame.from_dict(discharge)
         basal_df = pd.DataFrame.from_dict(basal)

@@ -1,5 +1,5 @@
 """This module is for methods and calculations related to
-the BISICLES filetools. 
+the BISICLES filetools.
 
 classes: Flatten, Masks
 """
@@ -58,9 +58,9 @@ class Flatten:
             netcdf of flattend AMR file
         """
         name = self.find_name()
-        nc = path + name + ".nc"
+        nc_name = path + name + ".nc"
         flatten_output = subprocess.Popen(
-            [flatten, self.file, nc, "0", "-3333500", "-3333500"],
+            [flatten, self.file, nc_name, "0", "-3333500", "-3333500"],
             stdout=subprocess.PIPE,
         )
         # assess
@@ -76,48 +76,48 @@ class Flatten:
         """
         self.flatten(flatten, path)
         name = self.find_name()
-        nc = path + name + ".nc"
-        dat = xr.open_dataset(nc)
+        nc_name = path + name + ".nc"
+        dat = xr.open_dataset(nc_name)
         assert dat.time.size != 0, "dataset is empty"
         return dat
 
-    def flatten_mean(self, dat):
+    def flatten_mean(self, flatten_dat):
         """Take mean of each variable in flattened file
         Args:
-            dat (xarray dataset): BISICLES flattened file
+            flatten_dat (xarray dataset): BISICLES flattened file
         Returns:
             pandas dataframe (df) of mean values for each variable
         """
         variables = []
         means = []
-        for i in dat:
-            m = dat[i].mean().values
+        for i in flatten_dat:
+            val_mean = flatten_dat[i].mean().values
             variables.append(i)
-            means.append(m)
-        df = pd.DataFrame(columns=vars)
-        series = pd.Series(means, index=df.columns)
-        df = df.append(series, ignore_index=True)
-        assert df.empty is False, "Dataframe should not be empty"
-        return df
+            means.append(val_mean)
+        means_df = pd.DataFrame(columns=vars)
+        series = pd.Series(means, index=means_df.columns)
+        means_df = means_df.append(series, ignore_index=True)
+        assert means_df.empty is False, "Dataframe should not be empty"
+        return means_df
 
-    def flatten_sum(self, dat):
+    def flatten_sum(self, flatten_dat):
         """Take sum of each variable in flattened file
         Args:
-            dat (xarray dataarray): BISICLES flattened file
+            flatten_dat (xarray dataarray): BISICLES flattened file
         Returns:
             pandas dataframe (df) of sum of values for each variable
         """
         variables = []
         means = []
-        for i in dat:
-            m = dat[i].sum().values
+        for i in flatten_dat:
+            val_sum = flatten_dat[i].sum().values
             variables.append(i)
-            means.append(m)
-        df = pd.DataFrame(columns=vars)
-        series = pd.Series(means, index=df.columns)
-        df = df.append(series, ignore_index=True)
-        assert df.empty is False, "Dataframe should not be empty"
-        return df
+            means.append(val_sum)
+        sums_df = pd.DataFrame(columns=vars)
+        series = pd.Series(means, index=sums_df.columns)
+        sums_df = sums_df.append(series, ignore_index=True)
+        assert sums_df.empty is False, "Dataframe should not be empty"
+        return sums_df
 
     def mean(self, flatten):
         """Flatten amr file and take mean
@@ -126,9 +126,9 @@ class Flatten:
         Returns:
             pandas dataframe (df) of mean values for each variable
         """
-        dat = self.open(flatten)
-        df = self.flatten_mean(dat)
-        return df
+        flatten_dat = self.open(flatten)
+        means_df = self.flatten_mean(flatten_dat)
+        return means_df
 
     def sum(self, flatten):
         """Flatten amr file and take sum
@@ -137,9 +137,9 @@ class Flatten:
         Returns:
             pandas dataframe (df) of sum of values for each variable
         """
-        dat = self.open(flatten)
-        df = self.flatten_sum(dat)
-        return df
+        flatten_dat = self.open(flatten)
+        sums_df = self.flatten_sum(flatten_dat)
+        return sums_df
 
 
 class Masks:

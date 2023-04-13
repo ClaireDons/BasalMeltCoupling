@@ -1,12 +1,18 @@
+"""This module is for methods and calculations related to
+the BISICLES filetools. 
+
+classes: Flatten, Masks
+"""
+
 import os
 import subprocess
+from glob import glob
+import numpy as np
 import pandas as pd
 import xarray as xr
-import numpy as np
-from glob import glob
 
 
-class flatten:
+class Flatten:
     """Class for BISICLES amr files and methods relating to flatten
     ...
     Attributes
@@ -53,12 +59,12 @@ class flatten:
         """
         name = self.find_name()
         nc = path + name + ".nc"
-        flattenOutput = subprocess.Popen(
+        flatten_output = subprocess.Popen(
             [flatten, self.file, nc, "0", "-3333500", "-3333500"],
             stdout=subprocess.PIPE,
         )
         # assess
-        flattenOutput.communicate()[0]
+        flatten_output.communicate()[0]
 
     def open(self, flatten, path):
         """Flatten AMR file and open it
@@ -75,42 +81,42 @@ class flatten:
         assert dat.time.size != 0, "dataset is empty"
         return dat
 
-    def flattenMean(self, dat):
+    def flatten_mean(self, dat):
         """Take mean of each variable in flattened file
         Args:
             dat (xarray dataset): BISICLES flattened file
         Returns:
             pandas dataframe (df) of mean values for each variable
         """
-        vars = []
+        variables = []
         means = []
         for i in dat:
             m = dat[i].mean().values
-            vars.append(i)
+            variables.append(i)
             means.append(m)
         df = pd.DataFrame(columns=vars)
         series = pd.Series(means, index=df.columns)
         df = df.append(series, ignore_index=True)
-        assert df.empty == False, "Dataframe should not be empty"
+        assert df.empty is False, "Dataframe should not be empty"
         return df
 
-    def flattenSum(self, dat):
+    def flatten_sum(self, dat):
         """Take sum of each variable in flattened file
         Args:
             dat (xarray dataarray): BISICLES flattened file
         Returns:
             pandas dataframe (df) of sum of values for each variable
         """
-        vars = []
+        variables = []
         means = []
         for i in dat:
             m = dat[i].sum().values
-            vars.append(i)
+            variables.append(i)
             means.append(m)
         df = pd.DataFrame(columns=vars)
         series = pd.Series(means, index=df.columns)
         df = df.append(series, ignore_index=True)
-        assert df.empty == False, "Dataframe should not be empty"
+        assert df.empty is False, "Dataframe should not be empty"
         return df
 
     def mean(self, flatten):
@@ -121,7 +127,7 @@ class flatten:
             pandas dataframe (df) of mean values for each variable
         """
         dat = self.open(flatten)
-        df = self.flattenMean(dat)
+        df = self.flatten_mean(dat)
         return df
 
     def sum(self, flatten):
@@ -132,13 +138,24 @@ class flatten:
             pandas dataframe (df) of sum of values for each variable
         """
         dat = self.open(flatten)
-        df = self.flattenSum(dat)
+        df = self.flatten_sum(dat)
         return df
 
-    pass
 
+class Masks:
+    """Class for opening bisicles amr masks
 
-class masks:
+    Attributes
+    ----------
+    path (str): path to mask files
+
+    Methods
+    -------
+    bisicles_masks
+        Method opening region masks and creating a dictionary containing them
+
+    """
+
     def __init__(self, path):
         self.path = path
 
@@ -159,5 +176,3 @@ class masks:
         x = np.array(dat["x"])
         y = np.array(dat["y"])
         return x, y, bisicles_masks
-
-    pass

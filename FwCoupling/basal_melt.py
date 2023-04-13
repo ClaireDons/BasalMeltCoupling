@@ -1,7 +1,11 @@
+""" This module is for calculating basal melt based on
+ocean temperature from EC-Earth.
+"""
+
 import numpy as np
 import xarray as xr
 import pandas as pd
-from FwCoupling.AntarcticSectors import LevermannSectors as levermann
+from FwCoupling.antarctic_sectors import LevermannSectors as levermann
 
 
 class OceanData:
@@ -48,7 +52,7 @@ class OceanData:
         self.thetao = thetao
         self.area = area
 
-    def openDatasets(self):
+    def open_datasets(self):
         """Open datasets
         Args:
             thetao (str): path to ocean temperature dataset
@@ -56,9 +60,9 @@ class OceanData:
         Returns:
             xarray datasets of ocean temperature and area dataset
         """
-        ds = xr.open_dataset(self.thetao)
+        thetao_ds = xr.open_dataset(self.thetao)
         area_ds = xr.open_dataset(self.area)
-        return ds, area_ds
+        return thetao_ds, area_ds
 
     def area_weighted_mean(self, ds_sel, ds_area):
         """Compute area weighted mean oceanic temperature over specific oceanic sector
@@ -92,7 +96,8 @@ class OceanData:
         return masked_diff
 
     def nearest_above(self, my_array, target):
-        """Find nearest value in array that is greater than target value and return corresponding index
+        """Find nearest value in array that is greater than target value
+        and return corresponding index
         Args:
             my_array (xarray dataset): ocean data array
             target (float): depth to calculate around
@@ -104,7 +109,8 @@ class OceanData:
         return masked_diff.argmin()
 
     def nearest_below(self, my_array, target):
-        """Find nearest value in array that is smaller than target value and return corresponding index
+        """Find nearest value in array that is smaller than target value
+        and return corresponding index
             Args:
             my_array (xarray dataset): ocean data array
             target (float): depth to calculate around
@@ -115,11 +121,11 @@ class OceanData:
         masked_diff = self.nearest_mask(diff)
         return masked_diff.argmin()
 
-    def lev_weighted_mean(self, ds, lev_bnds, top, bottom):
+    def lev_weighted_mean(self, thetao_ds, lev_bnds, top, bottom):
         """Compute volume or depth weighted mean oceanic temperature over specific oceanic
         sector and specific depth layers (centered around ice shelf depth)
         Args:
-            ds (xarray dataset): 2D or 3D thetao dataset
+            thetao_ds (xarray dataset): 2D or 3D thetao dataset
             lev_bnds (xarray dataarray): ocean depth bands array
             sector (str): sector name
         Returns:
@@ -130,27 +136,28 @@ class OceanData:
         # layers
         lev_ind_bottom = self.nearest_above(lev_bnds[:, 1], bottom)
         lev_ind_top = self.nearest_below(lev_bnds[:, 0], top)
-        levs_slice = ds.isel(lev=slice(lev_ind_top, lev_ind_bottom + 1))
+        levs_slice = thetao_ds.isel(lev=slice(lev_ind_top, lev_ind_bottom + 1))
 
-        # Create weights for each oceanic layer, correcting for layers that fall only partly within specified depth range
+        # Create weights for each oceanic layer, correcting for layers
+        # that fall only partly within specified depth range
         lev_bnds_sel = lev_bnds.values[lev_ind_top : lev_ind_bottom + 1]
         lev_bnds_sel[lev_bnds_sel > bottom] = bottom
         lev_bnds_sel[lev_bnds_sel < top] = top
         # Weight equals thickness of each layer
         levs_weights = lev_bnds_sel[:, 1] - lev_bnds_sel[:, 0]
         # DataArray required to apply .weighted on DataArray
-        levs_weights_DA = xr.DataArray(
+        levs_weights_da = xr.DataArray(
             levs_weights, coords={"lev": levs_slice.lev}, dims=["lev"]
         )
 
         # Compute depth weighted mean of ocean slice
-        levs_slice_weighted = levs_slice.weighted(levs_weights_DA)
+        levs_slice_weighted = levs_slice.weighted(levs_weights_da)
         levs_weighted_mean = levs_slice_weighted.mean(("lev"))
 
         # Return layer-weighted ocean temperature
         return levs_weighted_mean
 
-    def ShelfBase(self, sector):
+    def shelf_base(self, sector):
         """select oceanic layers based on shelf depth
         Args:
             sector (str): name of sector
@@ -170,22 +177,22 @@ class OceanData:
         Returns:
             top (float) and bottom (float) ocean depth range limits
         """
-        depth_bnds_sector = self.ShelfBase(sector)
+        depth_bnds_sector = self.shelf_base(sector)
         top = depth_bnds_sector[0]
         bottom = depth_bnds_sector[1]
         return top, bottom
 
-    def sector_lev_mean(self, ds, lev_bnds, sector):
+    def sector_lev_mean(self, thetao_ds, lev_bnds, sector):
         """Compute mean of depth bounds
         Args:
-            ds (xarray dataset): ocean temperature dataset
+            thetao_ds (xarray dataset): ocean temperature dataset
             lev_bands (array): array of depth level bands
             sector (str): sector name
         Returns:
             lev_weighted_mean (xarray dataarray) depth weighted mean of ocean depth range
         """
         top, bottom = self.select_depth_range(sector)
-        lev_weighted_mean = self.lev_weighted_mean(ds, lev_bnds, top, bottom)
+        lev_weighted_mean = self.lev_weighted_mean(thetao_ds, lev_bnds, top, bottom)
         return lev_weighted_mean
 
     def weighted_mean_df(self):
@@ -198,26 +205,24 @@ class OceanData:
             df (pandas dataframe): dataframe with volume weighted mean for each sector
         """
         # Open thetao dataset
-        ds, area_ds = self.openDatasets()
-        ds_year = ds.groupby("time.year").mean("time")  # Compute annual mean
-        masks = levermann().sector_masks(ds)
+        thetao_ds, area_ds = self.open_datasets()
+        ds_year = thetao_ds.groupby("time.year").mean("time")  # Compute annual mean
+        masks = levermann().sector_masks(thetao_ds)
 
         # Loop over oceanic sectors
-        df = pd.DataFrame()
+        mean_df = pd.DataFrame()
         for sector in self.sectors:
             mask = masks[sector]
             ds_sel = ds_year["thetao"].where(mask)
-            thetaoAWM = self.area_weighted_mean(ds_sel, area_ds)
-            thetaoVWM = self.sector_lev_mean(
-                thetaoAWM, ds_year.lev_bnds.mean("year").copy(), sector
+            thetao_awm = self.area_weighted_mean(ds_sel, area_ds)
+            thetao_vwm = self.sector_lev_mean(
+                thetao_awm, ds_year.lev_bnds.mean("year").copy(), sector
             )
-            df[sector] = thetaoVWM
+            mean_df[sector] = thetao_vwm
 
         ds_year.close()
         area_ds.close()
-        return df
-
-    pass
+        return mean_df
 
 
 class BasalMelt(OceanData):
@@ -276,7 +281,7 @@ class BasalMelt(OceanData):
         ms = self.gamma * 10**5 * c_quad  # Quadratic constant
         return ms
 
-    def quadBasalMelt(self, dat):
+    def quad_basalmelt(self, dat):
         """Calculate basal melt
         Args:
             dat (float): ocean temperature value
@@ -284,10 +289,10 @@ class BasalMelt(OceanData):
             bm (float): basal melt value
         """
         ms = self.quad_constant()
-        bm = (dat - self.Tf) * (abs(dat - self.Tf)) * ms
-        return bm
+        basalmelt = (dat - self.Tf) * (abs(dat - self.Tf)) * ms
+        return basalmelt
 
-    def BasalMeltAnomalies(self, thetao, base):
+    def basalmelt_anomalies(self, thetao, base):
         """Calculate basal melt anomaly
         Args:
             thetao (float): ocean temperature value
@@ -295,30 +300,30 @@ class BasalMelt(OceanData):
         Returns:
             dBM (float) basal melt anomaly
         """
-        BM_base = self.quadBasalMelt(base)
-        BM = self.quadBasalMelt(thetao)
-        dBM = BM - BM_base
-        assert dBM < 100, "Basal melt too unrealistic"
-        assert dBM > -100, "Basal melt too unrealistic"
-        return dBM
+        basalmelt_base = self.quad_basalmelt(base)
+        basalmelt = self.quad_basalmelt(thetao)
+        d_basalmelt = basalmelt - basalmelt_base
+        assert d_basalmelt < 100, "Basal melt too unrealistic"
+        assert d_basalmelt > -100, "Basal melt too unrealistic"
+        return d_basalmelt
 
     def thetao2basalmelt(self):
         """Calculate basal melt from 3D ocean temperature file
         Returns:
             df2 (pandas dataframe) values of basal melt for each Antarctic region
         """
-        df = self.weighted_mean_df()
-        df2 = pd.DataFrame()
-        for column in df:
-            thetao = df[column].values
+        wmean_df = self.weighted_mean_df()
+        basalmelt_df = pd.DataFrame()
+        for column in wmean_df:
+            thetao = wmean_df[column].values
             base = self.baseline.get(column)
-            dBM = self.BasalMeltAnomalies(thetao, base)
-            df2[column] = dBM
-        assert df2.empty == False, "Dataframe should not be empty"
-        print(df2)
-        return df2
+            d_basalmelt = self.basalmelt_anomalies(thetao, base)
+            basalmelt_df[column] = d_basalmelt
+        assert basalmelt_df.empty is False, "Dataframe should not be empty"
+        print(basalmelt_df)
+        return basalmelt_df
 
-    def mapBasalMelt(self, mask_path, nc_out, driver, name):
+    def map_basalmelt(self, mask_path, nc_out, driver, name):
         """Calculate basal melt values and map to Antarctic sectors
         Args:
             mask_path (str): path to mask files
@@ -328,8 +333,6 @@ class BasalMelt(OceanData):
         Returns:
             basal melt dataframe and produces netcdf and hdf5 files
         """
-        df = self.thetao2basalmelt()
-        levermann().map2amr(mask_path, nc_out, driver, name, df)
-        return df
-
-    pass
+        basalmelt_df = self.thetao2basalmelt()
+        levermann().map2amr(mask_path, nc_out, driver, name, basalmelt_df)
+        return basalmelt_df

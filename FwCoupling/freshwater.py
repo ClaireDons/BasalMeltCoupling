@@ -1,8 +1,12 @@
-from FwCoupling.AMRtools import flatten as flt
-from FwCoupling.AMRtools import masks as bisi_masks
+"""This module contains the methods and attributes for freshwater
+calculations for different regions of Antarctica
+"""
+
+import numpy as np
 import pandas as pd
 from scipy import ndimage
-import numpy as np
+from FwCoupling.amr_tools import Flatten as flt
+from FwCoupling.amr_tools import Masks as bisi_masks
 
 
 class Freshwater:
@@ -59,13 +63,14 @@ class Freshwater:
         Args:
             f (str): Name of file to flatten and take sum of
         Returns:
-            Dataframe with the sum of values for each variable in bisicles netcdf file
+            Dataframe with the sum of values for each variable
+            in bisicles netcdf file
         """
 
         df = flt(f).sum(self.flatten)
         return df
 
-    def Calving(self, smb, bmb, vol1, vol2):
+    def calving(self, smb, bmb, vol1, vol2):
         """Discharge Calculation
         Args:
             smb (float): surface mass balance
@@ -79,7 +84,7 @@ class Freshwater:
         U = (smb + bmb - div_vol) / (10**9)
         return U
 
-    def BasalMelt(self, bmb):
+    def basal_melt(self, bmb):
         """Basal melt calculation
         Args:
             bmb (float): basal melt balance in m yr-1
@@ -90,13 +95,14 @@ class Freshwater:
         bmb_gt = bmb_vol / (10**9)
         return -bmb_gt
 
-    def maskRegion(self, plot_dat, mask_dat):
+    def mask_region(self, plot_dat, mask_dat):
         """Downsample masks, mask out region, take sum, output to dataframe
         Args:
             plot_dat (xarray dataset): xarray dataset of BISICLES plot file
             mask_dat (xarray dataset): xarray dataset of original mask file
         Returns:
-            df (pandas dataframe): Dataframe of sum of each variable in BISICLES plot file for a certain region
+            df (pandas dataframe): Dataframe of sum of each variable in
+            BISICLES plot file for a certain region
         """
         mint = mask_dat.astype(int)
         new_m = ndimage.interpolation.zoom(mint, 0.125)
@@ -112,37 +118,40 @@ class Freshwater:
         df = pd.DataFrame(columns=cols)
         series = pd.Series(sums, index=df.columns)
         df = df.append(series, ignore_index=True)
-        assert df.empty == False, "Dataframe is empty"
+        assert df.empty is False, "Dataframe is empty"
         return df
 
-    def Contributions(self, dat1, dat2, m):
-        """Calving and Basal melt contribution for a certain region of Antarctica
+    def contributions(self, dat1, dat2, m):
+        """Calving and Basal melt contribution for a certain region of
+        Antarctica
         Args:
             dat1 (xarray dataset): BISICLES plot file timestep 1
             dat2 (xarray dataset): BISICLES plot file timestep 2
             m (xarray dataset): mask file of region
         returns:
-            U (float): Calving contribution in gigatonnes and bmb (float) basal melt contribution in gigatonnes
+            U (float): Calving contribution in gigatonnes and bmb (float)
+            basal melt contribution in gigatonnes
         """
-        df1 = self.maskRegion(dat1, m)
-        df2 = self.maskRegion(dat2, m)
-        U = self.Calving(
+        df1 = self.mask_region(dat1, m)
+        df2 = self.mask_region(dat2, m)
+        U = self.calving(
             df2.activeSurfaceThicknessSource,
             df2.activeBasalThicknessSource,
             df1.thickness,
             df2.thickness,
         )
-        bmb = self.BasalMelt(df2.activeBasalThicknessSource)
+        bmb = self.basal_melt(df2.activeBasalThicknessSource)
         return U, bmb
 
-    def RegionalContribution(self, mask_path, nc_out, driver):
+    def regional_contribution(self, mask_path, nc_out, driver):
         """Calving and Basal melt contribution for each region of Antarctica
         Args:
             mask_path (str): path to mask files
             nc_out (str): path to netcdf output
             driver (str): BISICLES nc2amr driver path
         Returns:
-            discharge_df (pandas dataframe) and basal_df (pandas dataframe): dataframes of calving
+            discharge_df (pandas dataframe) and
+            basal_df (pandas dataframe): dataframes of calving
             and basal melt contribution for all regions of Antarctica
         """
         x, y, masks = self.region(mask_path)
@@ -151,11 +160,9 @@ class Freshwater:
         discharge = {}
         basal = {}
         for key, m in masks.items():
-            U, bmb = self.Contributions(dat1, dat2, m)
+            U, bmb = self.contributions(dat1, dat2, m)
             discharge[key] = U
             basal[key] = bmb
         discharge_df = pd.DataFrame.from_dict(discharge)
         basal_df = pd.DataFrame.from_dict(basal)
         return discharge_df, basal_df
-
-    pass

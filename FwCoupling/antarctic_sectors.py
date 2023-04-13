@@ -7,7 +7,7 @@ Classes: LevermannSectors
 import os
 import numpy as np
 import xarray as xr
-from FwCoupling.AMRtools import masks as bisi_masks
+from FwCoupling.amr_tools import Masks as bisi_masks
 
 
 class LevermannSectors:
@@ -115,5 +115,3 @@ class LevermannSectors:
             os.system(
                 driver + " " + nc_out + name + ".nc " + nc_out + name + ".2d.hdf5 bm"
             )
-
-    pass

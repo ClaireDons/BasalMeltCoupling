@@ -21,7 +21,7 @@ SH_BISICLES="BISICLES_submission_template.slurm"
 bm=basal_melt.2d.hdf5 
 
 ### 4. Run basal melt python script    
-python3 ComputeBasalMelt.py ${num} || exit
+python3 compute_basalmelt.py ${num} || exit
 
 ### 5. Define new basal melt values in input files
 export COUPLED=BISICLES_submission.slurm
@@ -43,7 +43,7 @@ echo "...BISICLES done!"
 if test -n "$(find $plots -type f -name "plot.$n.??????.2d.hdf5" -print -quit)"
     then
     echo "Found plot, calculating freshwater"
-    python3 ComputeFreshwater.py ${num} || exit
+    python3 compute_freshwater.py ${num} || exit
     else
     echo "Something went wrong, no plot"
     exit 

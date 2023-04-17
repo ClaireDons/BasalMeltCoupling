@@ -8,24 +8,30 @@ BISICLES flatten tool.
 Requires the Freshwater modules and glob
 """
 
+import os
 from glob import iglob
 from FwCoupling import freshwater as FW
 
 
 # Define paths
-PATH = "/ec/res4/scratch/nlcd/CMIP6/BasalMeltCoupling/"
-MASK_PATH = PATH + "inputs/levermann_masks/"
-NC_OUT = PATH + "outputs/plots/nc/"
-PLOT_PATH = PATH + "outputs/plots/hdf5/"
+PATH = os.path.dirname(os.path.realpath(__file__))
+SCRATCH = "/scratch/nlcd/"
+PERM = "/perm/nlcd/"
+EXP_NAME = "COUPLING_TEST"
+BISICLES_HOME = (
+    PERM + "ecearth3-bisicles/r9411-cmip6-bisicles-knmi/sources/BISICLES/"
+)
 
 # Define parameters
-BISICLES_HOME = (
-    "/perm/nlcd/ecearth3-bisicles/r9411-cmip6-bisicles-knmi/sources/BISICLES/"
-)
 FILETOOLS_PATH = BISICLES_HOME + "code/filetools/"
 FILETOOLS_FLATTEN = "flatten2d.Linux.64.mpiCC.mpif90.DEBUG.OPT.MPI.PETSC.ex"
 FLATTEN = FILETOOLS_PATH + FILETOOLS_FLATTEN
 
+
+MASK_PATH = PATH + "/inputs/levermann_masks/"
+NC_OUT = SCRATCH + EXP_NAME + "/plots/nc/"
+PLOT_PATH = SCRATCH + EXP_NAME + "/plots/hdf5/"
+CSV_OUT = SCRATCH + EXP_NAME + "/csv/"
 
 if __name__ == "__main__":
     PENULTIMATE_FILE = sorted(iglob(PLOT_PATH + "*.2d.hdf5"), reverse=True)[1]
@@ -35,7 +41,7 @@ if __name__ == "__main__":
 
     FRESHWATER = FW.Freshwater(FLATTEN, PENULTIMATE_FILE, LATEST_FILE)
     DISCHARGE, BASAL = FRESHWATER.regional_contribution(MASK_PATH, NC_OUT, FLATTEN)
-    DISCHARGE.to_csv("outputs/csv/discharge.csv", index=False)
-    BASAL.to_csv("outputs/csv/basal.csv", index=False)
+    DISCHARGE.to_csv(CSV_OUT + "discharge.csv", index=False)
+    BASAL.to_csv(CSV_OUT + "basal.csv", index=False)
     print(DISCHARGE)
     print(BASAL)

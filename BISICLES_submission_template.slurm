@@ -22,11 +22,15 @@ echo "INFILE = $INFILE"
 cp $INFILEBASE $INFILE
 
 n=coupled_bm
-checkpoints=/ec/res4/scratch/nlcd/CMIP6/BasalMeltCoupling/outputs/checkpoints
+scratchpath=/scratch/nlcd
+expname=COUPLING_TEST
+outpath=$scratchpath/$expname
+checkpoints=$outpath/checkpoints
+echo checkpoints
 bm=@melt
 
 # Count the number of checkpoints to increase time to run to incrementally 
-count=$(find outputs/checkpoints/chk.* -maxdepth 1 -type f|wc -l)
+count=$(find $checkpoints/chk.* -maxdepth 1 -type f|wc -l)
 echo $count
 
 if test $count -eq 0
@@ -38,6 +42,7 @@ fi
 
 echo $count
 
+sed -i s/@EXP/$expname/ $INFILE
 sed -i s/@NAME/$n/ $INFILE
 sed -i s/@BM_DATA/$bm/ $INFILE
 sed -i s/@TIME/$count/ $INFILE
@@ -50,7 +55,7 @@ export CH_OUTPUT_INTERVAL=0
 if test -n "$(find $checkpoints -type f -name "chk.$n.??????.2d.hdf5" -print -quit)"
     then
     echo "Checkpoint found"
-    LCHK=`ls outputs/checkpoints/chk.coupled_bm.??????.2d.hdf5 | tail -n 1`
+    LCHK=`ls $checkpoints/chk.$n.??????.2d.hdf5 | tail -n 1`
     echo "" >> $INFILE #ensure line break
     echo "amr.restart_file=$LCHK" >> $INFILE
     echo "amr.restart_set_time=false" >> $INFILE

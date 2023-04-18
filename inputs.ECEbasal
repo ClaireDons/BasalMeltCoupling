@@ -18,14 +18,14 @@ patersonRate.epsSqr0 = 1.0e-12
 
 #geometry  input data
 geometry.problem_type = LevelData
-inputLevelData.geometryFile = ../data/ant-minbed64-s-geometry-1km.2d.hdf5
+inputLevelData.geometryFile = /scratch/nlcd/CMIP6/BasalMeltCoupling/inputs/bisicles_data/ant-minbed64-s-geometry-1km.2d.hdf5
 inputLevelData.thicknessName = thck
 inputLevelData.topographyName = topg
 
 
 #basal friction input data
 geometry.beta_type = LevelData
-inputLevelData.frictionFile = ../data/ant-mb64-cthird-1km.2d.hdf5
+inputLevelData.frictionFile = /scratch/nlcd/CMIP6/BasalMeltCoupling/inputs/bisicles_data/ant-mb64-cthird-1km.2d.hdf5
 inputLevelData.frictionName = Cthird
 
 
@@ -44,11 +44,11 @@ BasalFrictionPowerLaw.includeEffectivePressure = false
 
 #stiffnes input data
 muCoefficient.type = LevelData
-inputLevelData.muCoefFile = ../data/ant-mb64-mucoefLT1-1km.2d.hdf5
+inputLevelData.muCoefFile = /scratch/nlcd/CMIP6/BasalMeltCoupling/inputs/bisicles_data/ant-mb64-mucoefLT1-1km.2d.hdf5
 inputLevelData.muCoefName = muCoefLT1
 
 temperature.type = LevelData
-inputLevelData.temperatureFile = ../data/antarctica-temperature-4km.2d.hdf5
+inputLevelData.temperatureFile = /scratch/nlcd/CMIP6/BasalMeltCoupling/inputs/bisicles_data/antarctica-temperature-4km.2d.hdf5
 inputLevelData.temperatureName = temp000000
 
 #physical constants
@@ -59,7 +59,7 @@ surfaceFlux.type = LevelData
 surfaceFlux.n = 1
 surfaceFlux.timeStep = 1.0e+10
 surfaceFlux.startTime = 0.0
-surfaceFlux.fileFormat = ../data/antarctica-acca-4km.2d.hdf5
+surfaceFlux.fileFormat = /scratch/nlcd/CMIP6/BasalMeltCoupling/inputs/bisicles_data/antarctica-acca-4km.2d.hdf5
 surfaceFlux.name = acca
 
 amr.floating_ice_basal_flux_is_dhdt = true
@@ -153,7 +153,7 @@ amr.blockFactor = 16      # block factor used in grid generation
 amr.fill_ratio = 0.85    # how efficient are the grids
 amr.nestingRadius = 3    # proper nesting radius required
 amr.tags_grow = 4        # amount to buffer tags
-amr.tagSubsetBoxesFile = ../data/tag_subset.ant
+amr.tagSubsetBoxesFile = /scratch/nlcd/CMIP6/BasalMeltCoupling/inputs/bisicles_data/tag_subset.ant
 amr.tagCap = 2
 amr.interpolate_zb = 1 #*do not* go back to the IBC to regrid geometry
 amr.max_box_size = 64        # largest box length allowed

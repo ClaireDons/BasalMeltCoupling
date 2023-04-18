@@ -7,8 +7,8 @@ Classes: Freshwater
 import numpy as np
 import pandas as pd
 from scipy import ndimage
-from FwCoupling.amr_tools import Flatten as flt
-from FwCoupling.amr_tools import Masks as bisi_masks
+from freshwater_coupling.amr_tools import Flatten as flt
+from freshwater_coupling.amr_tools import Masks as bisi_masks
 
 
 class Freshwater:

@@ -7,7 +7,7 @@ Classes: OceanData, BasalMelt
 import numpy as np
 import xarray as xr
 import pandas as pd
-from FwCoupling.antarctic_sectors import LevermannSectors as levermann
+from freshwater_coupling.antarctic_sectors import LevermannSectors as levermann
 
 
 class OceanData:

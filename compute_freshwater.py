@@ -10,7 +10,7 @@ Requires the Freshwater modules and glob
 
 import os
 from glob import iglob
-from FwCoupling import freshwater as FW
+from freshwater_coupling import freshwater as FW
 
 
 # Define paths

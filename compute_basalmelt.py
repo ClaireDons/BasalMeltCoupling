@@ -10,7 +10,7 @@ Requires the BasalMelt module.
 """
 
 import os
-from FwCoupling import basal_melt as BM
+from freshwater_coupling import basal_melt as BM
 
 # Define parameters
 PATH = os.path.dirname(os.path.realpath(__file__))

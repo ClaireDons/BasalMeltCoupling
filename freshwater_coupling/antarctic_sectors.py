@@ -7,7 +7,7 @@ Classes: LevermannSectors
 import os
 import numpy as np
 import xarray as xr
-from FwCoupling.amr_tools import Masks as bisi_masks
+from freshwater_coupling.amr_tools import Masks as bisi_masks
 
 
 class LevermannSectors:

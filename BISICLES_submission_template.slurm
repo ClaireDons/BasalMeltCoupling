@@ -27,7 +27,7 @@ expname=COUPLING_TEST
 outpath=$scratchpath/$expname
 checkpoints=$outpath/checkpoints
 echo checkpoints
-bm=@melt
+bm=$outpath/@melt
 
 # Count the number of checkpoints to increase time to run to incrementally 
 count=$(find $checkpoints/chk.* -maxdepth 1 -type f|wc -l)

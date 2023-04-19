@@ -30,11 +30,12 @@ GAMMA = 0.05
 NAME = "basal_melt"
 
 # Define paths
+EXP_OUT =  SCRATCH + EXP_NAME + "/"
 MASK_PATH = PATH + "/inputs/levermann_masks/"
-NC_OUT = SCRATCH + EXP_NAME + "/plots/nc/"
-PLOT_PATH = SCRATCH + EXP_NAME + "/plots/hdf5/"
-CSV_OUT = SCRATCH + EXP_NAME + "/csv/"
-CHK_OUT = SCRATCH + EXP_NAME + "/checkpoints/"
+NC_OUT = EXP_OUT + "plots/nc/"
+PLOT_PATH =  EXP_OUT  + "plots/hdf5/"
+CSV_OUT = EXP_OUT + "csv/"
+CHK_OUT = EXP_OUT + "checkpoints/"
 
 # Load leverman masks (Maybe in future should just be replaces with coordinates)
 DRIVER = (
@@ -56,6 +57,6 @@ if __name__ == "__main__":
     OUTPUT_CSV = new_path(CSV_OUT)
     OUTPUT_CHK = new_path(CHK_OUT)
     OCEAN_TEMP = BM.BasalMelt(THETAO_FILE, AREA_FILE, GAMMA)
-    OCEAN_TEMP.map_basalmelt(MASK_PATH, PATH + "/", DRIVER, NAME)
+    OCEAN_TEMP.map_basalmelt(MASK_PATH, EXP_OUT, DRIVER, NAME)
 
     print("Basal Melt Calculated")

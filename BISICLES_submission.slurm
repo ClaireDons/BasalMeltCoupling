@@ -21,15 +21,11 @@ export INFILE=inputs.ECEbasal.$SLURM_JOBID
 echo "INFILE = $INFILE"
 cp $INFILEBASE $INFILE
 
-n=coupled_bm
-scratchpath=/scratch/nlcd
 expname=COUPLING_TEST
-outpath=$scratchpath/$expname
+bisi_input=/scratch/nlcd/bisicles_setup
+outpath=/scratch/nlcd/COUPLING_TEST
 checkpoints=$outpath/checkpoints
-echo checkpoints
 bm=$outpath/basal_melt.2d.hdf5
-
-echo $bm
 
 # Count the number of checkpoints to increase time to run to incrementally 
 count=$(find $checkpoints/chk.* -maxdepth 1 -type f|wc -l)
@@ -44,20 +40,21 @@ fi
 
 echo $count
 
-sed -i s/@EXP/$expname/ $INFILE
-sed -i s/@NAME/$n/ $INFILE
-sed -i s/@BM_DATA/$bm/ $INFILE
-sed -i s/@TIME/$count/ $INFILE
+sed -i s+@EXP+$expname+ $INFILE
+sed -i s+@OUT+$outpath+ $INFILE
+sed -i s+@BM_DATA+$bm+ $INFILE
+sed -i s+@TIME+$count+ $INFILE
+sed -i s+@BISI_INPUT+$bisi_input+ $INFILE
 
 export PYTHONPATH=`pwd`
 export LD_LIBRARY_PATH=$HDF5_PARALLEL_DIR/lib:$PYTHON3_DIR/lib:$LD_LIBRARY_PATH
 export CH_OUTPUT_INTERVAL=0
 
  # work out what the latest checkpoint file is (if it exists)
-if test -n "$(find $checkpoints -type f -name "chk.$n.??????.2d.hdf5" -print -quit)"
+if test -n "$(find $checkpoints -type f -name "chk.$expname.??????.2d.hdf5" -print -quit)"
     then
     echo "Checkpoint found"
-    LCHK=`ls $checkpoints/chk.$n.??????.2d.hdf5 | tail -n 1`
+    LCHK=`ls $checkpoints/chk.$expname.??????.2d.hdf5 | tail -n 1`
     echo "" >> $INFILE #ensure line break
     echo "amr.restart_file=$LCHK" >> $INFILE
     echo "amr.restart_set_time=false" >> $INFILE

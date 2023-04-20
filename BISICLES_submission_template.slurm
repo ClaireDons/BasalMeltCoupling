@@ -14,19 +14,17 @@ module load hdf5-parallel/1.10.6
 module load netcdf4-parallel/4.7.4
 
 # Define driver 
-export DRIVER=/perm/nlcd/ecearth3-bisicles/r9411-cmip6-bisicles-knmi/sources/BISICLES/code/exec2D/driver2d.Linux.64.mpiCC.mpif90.DEBUG.OPT.MPI.PETSC.ex
+export DRIVER=@driver
 # Define input files
 export INFILEBASE="inputs.ECEbasal"
 export INFILE=inputs.ECEbasal.$SLURM_JOBID
 echo "INFILE = $INFILE"
 cp $INFILEBASE $INFILE
 
-n=coupled_bm
-scratchpath=/scratch/nlcd
-expname=COUPLING_TEST
-outpath=$scratchpath/$expname
+expname=@exp
+bisi_input=@bisi
+outpath=@out
 checkpoints=$outpath/checkpoints
-echo checkpoints
 bm=$outpath/@melt
 
 # Count the number of checkpoints to increase time to run to incrementally 
@@ -42,20 +40,21 @@ fi
 
 echo $count
 
-sed -i s/@EXP/$expname/ $INFILE
-sed -i s/@NAME/$n/ $INFILE
-sed -i s/@BM_DATA/$bm/ $INFILE
-sed -i s/@TIME/$count/ $INFILE
+sed -i s+@EXP+$expname+ $INFILE
+sed -i s+@OUT+$outpath+ $INFILE
+sed -i s+@BM_DATA+$bm+ $INFILE
+sed -i s+@TIME+$count+ $INFILE
+sed -i s+@BISI_INPUT+$bisi_input+ $INFILE
 
 export PYTHONPATH=`pwd`
 export LD_LIBRARY_PATH=$HDF5_PARALLEL_DIR/lib:$PYTHON3_DIR/lib:$LD_LIBRARY_PATH
 export CH_OUTPUT_INTERVAL=0
 
  # work out what the latest checkpoint file is (if it exists)
-if test -n "$(find $checkpoints -type f -name "chk.$n.??????.2d.hdf5" -print -quit)"
+if test -n "$(find $checkpoints -type f -name "chk.$expname.??????.2d.hdf5" -print -quit)"
     then
     echo "Checkpoint found"
-    LCHK=`ls $checkpoints/chk.$n.??????.2d.hdf5 | tail -n 1`
+    LCHK=`ls $checkpoints/chk.$expname.??????.2d.hdf5 | tail -n 1`
     echo "" >> $INFILE #ensure line break
     echo "amr.restart_file=$LCHK" >> $INFILE
     echo "amr.restart_set_time=false" >> $INFILE

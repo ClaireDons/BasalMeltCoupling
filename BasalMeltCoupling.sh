@@ -13,23 +13,37 @@ export PYTHONPATH=`pwd`
 export LD_LIBRARY_PATH=$HDF5_PARALLEL_DIR/lib:$PYTHON3_DIR/lib:$LD_LIBRARY_PATH
 
 # 3. Define names and paths needed
-n=coupled_bm
-NC_PLOT=plot.$n.nc
-scratch_path=/scratch/nlcd
+### experiment name and variables
 exp_name=COUPLING_TEST
-plots=$scratch_path/$exp_name/plots/hdf5/
-echo $plots
-FLATTEN="/perm/nlcd/bisicles/BISICLES/code/filetools/flatten2d.Linux.64.mpiCC.gfortran.DEBUG.MPI.ex"
-SH_BISICLES="BISICLES_submission_template.slurm"
-bm=basal_melt.2d.hdf5 
+gamma=0.05
+bm_name=basal_melt.2d.hdf5
+
+### paths
+scratch_path=/scratch/nlcd
+BISI_INPUT=$scratch_path/bisicles_setup 
+outpath=$scratch_path/$exp_name
+plots=$outpath/plots/hdf5/
+
+# BISICLES paths + driver and tools
+BISICLES_HOME="/perm/nlcd/ecearth3-bisicles/r9411-cmip6-bisicles-knmi/sources/BISICLES"
+FLATTEN="$BISICLES_HOME/code/flatten2d.Linux.64.mpiCC.mpif90.DEBUG.OPT.MPI.PETSC.ex"
+DRIVER="$BISICLES_HOME/code/exec2D/driver2d.Linux.64.mpiCC.mpif90.DEBUG.OPT.MPI.PETSC.ex"
+
+### Pass parameters to python
 
 ### 4. Run basal melt python script    
 python3 compute_basalmelt.py ${num} || exit
 
 ### 5. Define new basal melt values in input files
+COUPLED_TEMPLATE="BISICLES_submission_template.slurm"
 export COUPLED=BISICLES_submission.slurm
-cp $SH_BISICLES $COUPLED
-sed -i s/@melt/$bm/ $COUPLED
+cp $COUPLED_TEMPLATE $COUPLED
+
+sed -i s+@melt+$bm_name+ $COUPLED
+sed -i s+@exp+$exp_name+ $COUPLED
+sed -i s+@out+$outpath+ $COUPLED
+sed -i s+@driver+$DRIVER+ $COUPLED
+sed -i s+@bisi+$BISI_INPUT+ $COUPLED
 
 # 6. Get job id and wait for BISICLES to finish running
 jid=$(sbatch BISICLES_submission.slurm| cut -d ' ' -f4)
@@ -43,7 +57,7 @@ rm $jid.txt
 echo "...BISICLES done!"
 
 # 7. Check whether plot files exist, if they do calculate freshwater
-if test -n "$(find $plots -type f -name "plot.$n.??????.2d.hdf5" -print -quit)"
+if test -n "$(find $plots -type f -name "plot.$exp_name.??????.2d.hdf5" -print -quit)"
     then
     echo "Found plot, calculating freshwater"
     python3 compute_freshwater.py ${num} || exit

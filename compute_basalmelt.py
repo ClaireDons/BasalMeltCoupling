@@ -10,14 +10,17 @@ Requires the BasalMelt module.
 """
 
 import os
+import sys
 from freshwater_coupling import basal_melt as BM
 
 # Define parameters
+EXP_NAME = str(sys.argv[1])
+GAMMA = float(sys.argv[2])
+NAME = str(sys.argv[3])
+
+# Define Paths
 PATH = os.path.dirname(os.path.realpath(__file__))
-SCRATCH = "/scratch/nlcd/"
-PERM = "/perm/nlcd/"
-EXP_NAME = "COUPLING_TEST"
-BISICLES_HOME = PERM + "ecearth3-bisicles/r9411-cmip6-bisicles-knmi/sources/BISICLES/"
+MASK_PATH = PATH + "/inputs/levermann_masks/"
 
 AREA_FILE = (
     PATH + "/inputs/ec-earth_data/areacello_Ofx_EC-Earth3_historical_r1i1p1f1_gn.nc"
@@ -26,22 +29,16 @@ THETAO_FILE = (
     PATH
     + "/inputs/ec-earth_data/thetao_Omon_EC-Earth3_historical_r1i1p1f1_gn_201401-201412.nc"
 )
-GAMMA = 0.05
-NAME = "basal_melt"
 
-# Define paths
-EXP_OUT =  SCRATCH + EXP_NAME + "/"
-MASK_PATH = PATH + "/inputs/levermann_masks/"
+SCRATCH = str(sys.argv[4]) + "/"
+EXP_OUT = SCRATCH + EXP_NAME + "/"
 NC_OUT = EXP_OUT + "plots/nc/"
-PLOT_PATH =  EXP_OUT  + "plots/hdf5/"
+PLOT_PATH = EXP_OUT + "plots/hdf5/"
 CSV_OUT = EXP_OUT + "csv/"
 CHK_OUT = EXP_OUT + "checkpoints/"
 
 # Load leverman masks (Maybe in future should just be replaces with coordinates)
-DRIVER = (
-    BISICLES_HOME
-    + "code/filetools/nctoamr2d.Linux.64.mpiCC.mpif90.DEBUG.OPT.MPI.PETSC.ex"
-)
+DRIVER = str(sys.argv[5])
 
 
 def new_path(path_name):

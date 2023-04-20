@@ -9,6 +9,7 @@ Requires the Freshwater modules and glob
 """
 
 import os
+import sys
 from glob import iglob
 from freshwater_coupling import freshwater as FW
 

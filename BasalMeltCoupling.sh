@@ -16,7 +16,8 @@ export LD_LIBRARY_PATH=$HDF5_PARALLEL_DIR/lib:$PYTHON3_DIR/lib:$LD_LIBRARY_PATH
 ### experiment name and variables
 exp_name=COUPLING_TEST
 gamma=0.05
-bm_name=basal_melt.2d.hdf5
+bm_name=basal_melt
+bm_file=$bm_name.2d.hdf5
 
 ### paths
 scratch_path=/scratch/nlcd
@@ -26,20 +27,19 @@ plots=$outpath/plots/hdf5/
 
 # BISICLES paths + driver and tools
 BISICLES_HOME="/perm/nlcd/ecearth3-bisicles/r9411-cmip6-bisicles-knmi/sources/BISICLES"
-FLATTEN="$BISICLES_HOME/code/flatten2d.Linux.64.mpiCC.mpif90.DEBUG.OPT.MPI.PETSC.ex"
+FLATTEN="$BISICLES_HOME/code/filetools/flatten2d.Linux.64.mpiCC.mpif90.DEBUG.OPT.MPI.PETSC.ex"
+NC2AMR="$BISICLES_HOME/code/filetools/nctoamr2d.Linux.64.mpiCC.mpif90.DEBUG.OPT.MPI.PETSC.ex"
 DRIVER="$BISICLES_HOME/code/exec2D/driver2d.Linux.64.mpiCC.mpif90.DEBUG.OPT.MPI.PETSC.ex"
 
-### Pass parameters to python
-
 ### 4. Run basal melt python script    
-python3 compute_basalmelt.py ${num} || exit
+python3 compute_basalmelt.py $exp_name $gamma $bm_name $scratch_path $NC2AMR ${num} || exit
 
 ### 5. Define new basal melt values in input files
 COUPLED_TEMPLATE="BISICLES_submission_template.slurm"
 export COUPLED=BISICLES_submission.slurm
 cp $COUPLED_TEMPLATE $COUPLED
 
-sed -i s+@melt+$bm_name+ $COUPLED
+sed -i s+@melt+$bm_file+ $COUPLED
 sed -i s+@exp+$exp_name+ $COUPLED
 sed -i s+@out+$outpath+ $COUPLED
 sed -i s+@driver+$DRIVER+ $COUPLED

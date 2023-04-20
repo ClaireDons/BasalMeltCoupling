@@ -13,20 +13,13 @@ import sys
 from glob import iglob
 from freshwater_coupling import freshwater as FW
 
+# Define parameters
+EXP_NAME = str(sys.argv[1])
 
 # Define paths
 PATH = os.path.dirname(os.path.realpath(__file__))
-SCRATCH = "/scratch/nlcd/"
-PERM = "/perm/nlcd/"
-EXP_NAME = "COUPLING_TEST"
-BISICLES_HOME = (
-    PERM + "ecearth3-bisicles/r9411-cmip6-bisicles-knmi/sources/BISICLES/"
-)
-
-# Define parameters
-FILETOOLS_PATH = BISICLES_HOME + "code/filetools/"
-FILETOOLS_FLATTEN = "flatten2d.Linux.64.mpiCC.mpif90.DEBUG.OPT.MPI.PETSC.ex"
-FLATTEN = FILETOOLS_PATH + FILETOOLS_FLATTEN
+SCRATCH = str(sys.argv[2]) + "/"
+FLATTEN = str(sys.argv[3])
 
 
 MASK_PATH = PATH + "/inputs/levermann_masks/"

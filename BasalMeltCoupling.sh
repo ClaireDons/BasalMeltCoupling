@@ -60,7 +60,7 @@ echo "...BISICLES done!"
 if test -n "$(find $plots -type f -name "plot.$exp_name.??????.2d.hdf5" -print -quit)"
     then
     echo "Found plot, calculating freshwater"
-    python3 compute_freshwater.py ${num} || exit
+    python3 compute_freshwater.py $exp_name $scratch_path $FLATTEN ${num} || exit
     else
     echo "Something went wrong, no plot"
     exit 

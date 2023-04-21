@@ -276,6 +276,7 @@ po/*~
 # Model output
 
 pout.*
+err.0
 slurm-*
 inputs.ECEbasal.*
 ecsbatch.log.*

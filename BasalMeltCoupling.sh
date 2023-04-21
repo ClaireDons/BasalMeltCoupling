@@ -54,6 +54,16 @@ do
     sleep 60
 done
 rm $jid.txt
+
+if test -f err.0
+    then
+    if grep -q "srun: error:" "err.0"
+    then
+        echo "BISICLES encountered an error, exiting."
+        exit
+    fi
+fi
+
 echo "...BISICLES done!"
 
 # 7. Check whether plot files exist, if they do calculate freshwater

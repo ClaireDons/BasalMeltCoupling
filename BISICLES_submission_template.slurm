@@ -61,5 +61,5 @@ if test -n "$(find $checkpoints -type f -name "chk.$expname.??????.2d.hdf5" -pri
     echo "" >> $INFILE #ensure line break
 fi
 
-srun $DRIVER $INFILE
+srun $DRIVER $INFILE > pout.0 2>err.0
 touch $SLURM_JOBID.txt

@@ -25,20 +25,27 @@ expname=COUPLING_TEST
 bisi_input=/scratch/nlcd/bisicles_setup
 outpath=/scratch/nlcd/COUPLING_TEST
 checkpoints=$outpath/checkpoints
+plots=$outpath/plots
 bm=$outpath/basal_melt.2d.hdf5
 
 # Count the number of checkpoints to increase time to run to incrementally 
+# Test that number of plots is equal to count
 count=$(find $checkpoints/chk.* -maxdepth 1 -type f|wc -l)
+plot_count = $(find $plots/plot.* -maxdepth 1 -type f|wc -l)
 echo $count
+echo $plot_count
 
 if test $count -eq 0
 then
     let count=count+1
 else
     let count=count # Increase by one, for the next file number
+    if $plot_count -ne $count
+    then
+        echo "Number of plots not equal to number of checkpoints, exiting"
+        exit
+    fi
 fi 
-
-echo $count
 
 sed -i s+@EXP+$expname+ $INFILE
 sed -i s+@OUT+$outpath+ $INFILE

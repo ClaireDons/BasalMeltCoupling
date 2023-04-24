@@ -25,26 +25,31 @@ expname=@exp
 bisi_input=@bisi
 outpath=@out
 checkpoints=$outpath/checkpoints
-plots=$outpath/plots
+plots=$outpath/plots/hdf5
 bm=$outpath/@melt
 
 # Count the number of checkpoints to increase time to run to incrementally 
 # Test that number of plots is equal to count
 count=$(find $checkpoints/chk.* -maxdepth 1 -type f|wc -l)
-plot_count = $(find $plots/plot.* -maxdepth 1 -type f|wc -l)
-echo $count
-echo $plot_count
+plot_count=$(find $plots/plot.* -maxdepth 1 -type f|wc -l)
 
 if test $count -eq 0
 then
     let count=count+1
 else
     let count=count # Increase by one, for the next file number
-    if $plot_count -ne $count
+    if test $plot_count -ne $count
     then
         echo "Number of plots not equal to number of checkpoints, exiting"
         exit
     fi
+    # If check point is found, get the latest and add it for restart
+    echo "Checkpoint found"
+    LCHK=`ls $checkpoints/chk.$expname.??????.2d.hdf5 | tail -n 1`
+    echo "" >> $INFILE #ensure line break
+    echo "amr.restart_file=$LCHK" >> $INFILE
+    echo "amr.restart_set_time=false" >> $INFILE
+    echo "" >> $INFILE #ensure line break
 fi 
 
 sed -i s+@EXP+$expname+ $INFILE
@@ -57,16 +62,7 @@ export PYTHONPATH=`pwd`
 export LD_LIBRARY_PATH=$HDF5_PARALLEL_DIR/lib:$PYTHON3_DIR/lib:$LD_LIBRARY_PATH
 export CH_OUTPUT_INTERVAL=0
 
- # work out what the latest checkpoint file is (if it exists)
-if test -n "$(find $checkpoints -type f -name "chk.$expname.??????.2d.hdf5" -print -quit)"
-    then
-    echo "Checkpoint found"
-    LCHK=`ls $checkpoints/chk.$expname.??????.2d.hdf5 | tail -n 1`
-    echo "" >> $INFILE #ensure line break
-    echo "amr.restart_file=$LCHK" >> $INFILE
-    echo "amr.restart_set_time=false" >> $INFILE
-    echo "" >> $INFILE #ensure line break
-fi
+echo "Calculating timestep $count"
 
 srun $DRIVER $INFILE > pout.0 2>err.0
 touch $SLURM_JOBID.txt

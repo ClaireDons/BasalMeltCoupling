@@ -77,8 +77,8 @@ class OceanData:
 
         area_weights = ds_area.areacello.fillna(0)
         area_weighted = ds_sel.weighted(area_weights)
-        lat = ds_sel.dims[2]
-        lon = ds_sel.dims[3]
+        lat = 'j' 
+        lon = 'i'
 
         area_weighted_mean = area_weighted.mean((lat, lon))
 
@@ -208,6 +208,7 @@ class OceanData:
         """
         # Open thetao dataset
         thetao_ds, area_ds = self.open_datasets()
+        #thetao_ds = thetao_ds.rename({'y':'j', 'x':'i', 'nav_lon':'longitude', 'nav_lat':'latitude', 'olevel':'lev'})
         ds_year = thetao_ds.groupby("time.year").mean("time")  # Compute annual mean
         masks = levermann().sector_masks(thetao_ds)
 
@@ -216,14 +217,19 @@ class OceanData:
         for sector in self.sectors:
             mask = masks[sector]
             ds_sel = ds_year["thetao"].where(mask)
+            #ds_lev_bnds = ds_year.olevel_bounds.mean("year").copy()
+            ds_lev_bnds = ds_year.lev_bnds.mean("year").copy()
             thetao_awm = self.area_weighted_mean(ds_sel, area_ds)
+            print(thetao_awm)
             thetao_vwm = self.sector_lev_mean(
-                thetao_awm, ds_year.lev_bnds.mean("year").copy(), sector
+                thetao_awm, ds_lev_bnds, sector
             )
+            print(thetao_vwm)
             mean_df[sector] = thetao_vwm
 
         ds_year.close()
         area_ds.close()
+        print("ocean T: ", mean_df)
         return mean_df
 
 
@@ -318,7 +324,9 @@ class BasalMelt(OceanData):
         basalmelt_df = pd.DataFrame()
         for column in wmean_df:
             thetao = wmean_df[column].values
+            print("ocean T: ", thetao)
             base = self.baseline.get(column)
+            print("base: ", base)
             d_basalmelt = self.basalmelt_anomalies(thetao, base)
             basalmelt_df[column] = d_basalmelt
         assert basalmelt_df.empty is False, "Dataframe should not be empty"

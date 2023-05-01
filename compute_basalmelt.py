@@ -11,6 +11,7 @@ Requires the BasalMelt module.
 
 import os
 import sys
+from glob import iglob
 from freshwater_coupling import basal_melt as BM
 
 # Define parameters
@@ -22,20 +23,24 @@ NAME = str(sys.argv[3])
 PATH = os.path.dirname(os.path.realpath(__file__))
 MASK_PATH = PATH + "/inputs/levermann_masks/"
 
-AREA_FILE = (
-    PATH + "/inputs/ec-earth_data/areacello_Ofx_EC-Earth3_historical_r1i1p1f1_gn.nc"
-)
-THETAO_FILE = (
-    PATH
-    + "/inputs/ec-earth_data/thetao_Omon_EC-Earth3_historical_r1i1p1f1_gn_201401-201412.nc"
-)
-
 SCRATCH = str(sys.argv[4]) + "/"
 EXP_OUT = SCRATCH + EXP_NAME + "/"
 NC_OUT = EXP_OUT + "plots/nc/"
 PLOT_PATH = EXP_OUT + "plots/hdf5/"
 CSV_OUT = EXP_OUT + "csv/"
 CHK_OUT = EXP_OUT + "checkpoints/"
+
+AREA_FILE = (
+    PATH + "/inputs/ec-earth_data/areacello_Ofx_EC-Earth3_historical_r1i1p1f1_gn.nc"
+)
+
+#NEMO_PATH = SCRATCH + "r9469-cmip6-bisi-knmi/TEST/output/nemo/001/"
+#THETAO_FILE = sorted(iglob(NEMO_PATH + "*_grid_T.nc"))[0]
+
+THETAO_FILE = (
+    PATH
+    + "/inputs/ec-earth_data/thetao_Omon_EC-Earth3_historical_r1i1p1f1_gn_201401-201412.nc"
+)
 
 # Load leverman masks (Maybe in future should just be replaces with coordinates)
 DRIVER = str(sys.argv[5])

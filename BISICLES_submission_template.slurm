@@ -28,6 +28,12 @@ checkpoints=$outpath/checkpoints
 plots=$outpath/plots/hdf5
 bm=$outpath/@melt
 
+
+sed -i s+@EXP+$expname+ $INFILE
+sed -i s+@OUT+$outpath+ $INFILE
+sed -i s+@BM_DATA+$bm+ $INFILE
+sed -i s+@BISI_INPUT+$bisi_input+ $INFILE
+
 # Count the number of checkpoints to increase time to run to incrementally 
 # Test that number of plots is equal to count
 count=$(find $checkpoints/chk.* -maxdepth 1 -type f|wc -l)
@@ -36,8 +42,10 @@ plot_count=$(find $plots/plot.* -maxdepth 1 -type f|wc -l)
 if test $count -eq 0
 then
     let count=count+1
+    sed -i s+@TIME+$count+ $INFILE
 else
     let count=count # Increase by one, for the next file number
+    sed -i s+@TIME+$count+ $INFILE
     if test $plot_count -ne $count
     then
         echo "Number of plots not equal to number of checkpoints, exiting"
@@ -52,11 +60,6 @@ else
     echo "" >> $INFILE #ensure line break
 fi 
 
-sed -i s+@EXP+$expname+ $INFILE
-sed -i s+@OUT+$outpath+ $INFILE
-sed -i s+@BM_DATA+$bm+ $INFILE
-sed -i s+@TIME+$count+ $INFILE
-sed -i s+@BISI_INPUT+$bisi_input+ $INFILE
 
 export PYTHONPATH=`pwd`
 export LD_LIBRARY_PATH=$HDF5_PARALLEL_DIR/lib:$PYTHON3_DIR/lib:$LD_LIBRARY_PATH

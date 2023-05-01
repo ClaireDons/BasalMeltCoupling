@@ -28,6 +28,12 @@ checkpoints=$outpath/checkpoints
 plots=$outpath/plots/hdf5
 bm=$outpath/basal_melt.2d.hdf5
 
+
+sed -i s+@EXP+$expname+ $INFILE
+sed -i s+@OUT+$outpath+ $INFILE
+sed -i s+@BM_DATA+$bm+ $INFILE
+sed -i s+@BISI_INPUT+$bisi_input+ $INFILE
+
 # Count the number of checkpoints to increase time to run to incrementally 
 # Test that number of plots is equal to count
 count=$(find $checkpoints/chk.* -maxdepth 1 -type f|wc -l)
@@ -36,13 +42,16 @@ plot_count=$(find $plots/plot.* -maxdepth 1 -type f|wc -l)
 if test $count -eq 0
 then
     let count=count+1
+    sed -i s+@TIME+$count+ $INFILE
 else
     let count=count # Increase by one, for the next file number
+    sed -i s+@TIME+$count+ $INFILE
     if test $plot_count -ne $count
     then
         echo "Number of plots not equal to number of checkpoints, exiting"
         exit
     fi
+    # If check point is found, get the latest and add it for restart
     echo "Checkpoint found"
     LCHK=`ls $checkpoints/chk.$expname.??????.2d.hdf5 | tail -n 1`
     echo "" >> $INFILE #ensure line break
@@ -51,26 +60,10 @@ else
     echo "" >> $INFILE #ensure line break
 fi 
 
-sed -i s+@EXP+$expname+ $INFILE
-sed -i s+@OUT+$outpath+ $INFILE
-sed -i s+@BM_DATA+$bm+ $INFILE
-sed -i s+@TIME+$count+ $INFILE
-sed -i s+@BISI_INPUT+$bisi_input+ $INFILE
 
 export PYTHONPATH=`pwd`
 export LD_LIBRARY_PATH=$HDF5_PARALLEL_DIR/lib:$PYTHON3_DIR/lib:$LD_LIBRARY_PATH
 export CH_OUTPUT_INTERVAL=0
-
- # work out what the latest checkpoint file is (if it exists)
-#if test -n "$(find $checkpoints -type f -name "chk.$expname.??????.2d.hdf5" -print -quit)"
-#    then
-#    echo "Checkpoint found"
-#    LCHK=`ls $checkpoints/chk.$expname.??????.2d.hdf5 | tail -n 1`
-#    echo "" >> $INFILE #ensure line break
-#    echo "amr.restart_file=$LCHK" >> $INFILE
-#    echo "amr.restart_set_time=false" >> $INFILE
-#    echo "" >> $INFILE #ensure line break
-#fi
 
 echo "Calculating timestep $count"
 

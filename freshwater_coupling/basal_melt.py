@@ -77,8 +77,8 @@ class OceanData:
 
         area_weights = ds_area.areacello.fillna(0)
         area_weighted = ds_sel.weighted(area_weights)
-        lat = 'j' 
-        lon = 'i'
+        lat = "j"
+        lon = "i"
 
         area_weighted_mean = area_weighted.mean((lat, lon))
 
@@ -208,8 +208,18 @@ class OceanData:
         """
         # Open thetao dataset
         thetao_ds, area_ds = self.open_datasets()
-        #thetao_ds = thetao_ds.rename({'y':'j', 'x':'i', 'nav_lon':'longitude', 'nav_lat':'latitude', 'olevel':'lev'})
-        ds_year = thetao_ds.groupby("time.year").mean("time")  # Compute annual mean
+        thetao_ds = thetao_ds.rename(
+            {
+                "y": "j",
+                "x": "i",
+                "nav_lon": "longitude",
+                "nav_lat": "latitude",
+                "olevel": "lev",
+            }
+        )
+        ds_year = thetao_ds.groupby("time_counter.year").mean(
+            "time_counter"
+        )  # Compute annual mean
         masks = levermann().sector_masks(thetao_ds)
 
         # Loop over oceanic sectors
@@ -217,13 +227,11 @@ class OceanData:
         for sector in self.sectors:
             mask = masks[sector]
             ds_sel = ds_year["thetao"].where(mask)
-            #ds_lev_bnds = ds_year.olevel_bounds.mean("year").copy()
-            ds_lev_bnds = ds_year.lev_bnds.mean("year").copy()
+            ds_lev_bnds = ds_year.olevel_bounds.mean("year").copy()
+            # ds_lev_bnds = ds_year.lev_bnds.mean("year").copy()
             thetao_awm = self.area_weighted_mean(ds_sel, area_ds)
             print(thetao_awm)
-            thetao_vwm = self.sector_lev_mean(
-                thetao_awm, ds_lev_bnds, sector
-            )
+            thetao_vwm = self.sector_lev_mean(thetao_awm, ds_lev_bnds, sector)
             print(thetao_vwm)
             mean_df[sector] = thetao_vwm
 
@@ -279,28 +287,28 @@ class BasalMelt(OceanData):
         OceanData.__init__(self, thetao, area)
         self.gamma = gamma
 
-    def quad_constant(self):
+    def basal_melt_sensitivity(self):
         """Calculate quadratic constant
         Returns:
-            ms (float) quadratic constant value
+            melt_sensitivity (float) quadratic constant value
         """
         c_lin = (self.rho_sw * self.c_po) / (self.rho_i * self.L_i)
         c_quad = (c_lin) ** 2
-        ms = self.gamma * 10**5 * c_quad  # Quadratic constant
-        return ms
+        melt_sensitivity = self.gamma * 10**5 * c_quad  # Quadratic constant
+        return melt_sensitivity
 
-    def quad_basalmelt(self, dat):
+    def quadratic_basal_melt(self, thetao):
         """Calculate basal melt
         Args:
-            dat (float): ocean temperature value
+            thetao (float): ocean temperature value
         Returns:
             bm (float): basal melt value
         """
-        ms = self.quad_constant()
-        basalmelt = (dat - self.Tf) * (abs(dat - self.Tf)) * ms
+        melt_sensitivity = self.basal_melt_sensitivity()
+        basalmelt = (thetao - self.Tf) * (abs(thetao - self.Tf)) * melt_sensitivity
         return basalmelt
 
-    def basalmelt_anomalies(self, thetao, base):
+    def basal_melt_anomalies(self, thetao, base):
         """Calculate basal melt anomaly
         Args:
             thetao (float): ocean temperature value
@@ -308,12 +316,12 @@ class BasalMelt(OceanData):
         Returns:
             dBM (float) basal melt anomaly
         """
-        basalmelt_base = self.quad_basalmelt(base)
-        basalmelt = self.quad_basalmelt(thetao)
-        d_basalmelt = basalmelt - basalmelt_base
-        assert d_basalmelt < 100, "Basal melt too unrealistic"
-        assert d_basalmelt > -100, "Basal melt too unrealistic"
-        return d_basalmelt
+        basalmelt_base = self.quadratic_basal_melt(base)
+        basalmelt = self.quadratic_basal_melt(thetao)
+        delta_basalmelt = basalmelt - basalmelt_base
+        assert delta_basalmelt < 100, "Basal melt too unrealistic"
+        assert delta_basalmelt > -100, "Basal melt too unrealistic"
+        return delta_basalmelt
 
     def thetao2basalmelt(self):
         """Calculate basal melt from 3D ocean temperature file
@@ -327,8 +335,8 @@ class BasalMelt(OceanData):
             print("ocean T: ", thetao)
             base = self.baseline.get(column)
             print("base: ", base)
-            d_basalmelt = self.basalmelt_anomalies(thetao, base)
-            basalmelt_df[column] = d_basalmelt
+            delta_basalmelt = self.basal_melt_anomalies(thetao, base)
+            basalmelt_df[column] = delta_basalmelt
         assert basalmelt_df.empty is False, "Dataframe should not be empty"
         print(basalmelt_df)
         return basalmelt_df

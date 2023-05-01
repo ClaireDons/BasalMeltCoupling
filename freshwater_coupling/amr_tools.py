@@ -119,25 +119,25 @@ class Flatten:
         assert sums_df.empty is False, "Dataframe should not be empty"
         return sums_df
 
-    def mean(self, flatten):
+    def mean(self, flatten, path):
         """Flatten amr file and take mean
          Args:
             flatten (str): path to flatten driver
         Returns:
             pandas dataframe (df) of mean values for each variable
         """
-        flatten_dat = self.open(flatten)
+        flatten_dat = self.open(flatten, path)
         means_df = self.flatten_mean(flatten_dat)
         return means_df
 
-    def sum(self, flatten):
+    def sum(self, flatten, path):
         """Flatten amr file and take sum
         Args:
             flatten (str): path to flatten driver
         Returns:
             pandas dataframe (df) of sum of values for each variable
         """
-        flatten_dat = self.open(flatten)
+        flatten_dat = self.open(flatten, path)
         sums_df = self.flatten_sum(flatten_dat)
         return sums_df
 

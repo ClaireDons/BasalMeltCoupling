@@ -34,13 +34,8 @@ AREA_FILE = (
     PATH + "/inputs/ec-earth_data/areacello_Ofx_EC-Earth3_historical_r1i1p1f1_gn.nc"
 )
 
-#NEMO_PATH = SCRATCH + "r9469-cmip6-bisi-knmi/TEST/output/nemo/001/"
-#THETAO_FILE = sorted(iglob(NEMO_PATH + "*_grid_T.nc"))[0]
-
-THETAO_FILE = (
-    PATH
-    + "/inputs/ec-earth_data/thetao_Omon_EC-Earth3_historical_r1i1p1f1_gn_201401-201412.nc"
-)
+NEMO_PATH = SCRATCH + "r9469-cmip6-bisi-knmi/TEST/output/nemo/001/"
+THETAO_FILE = sorted(iglob(NEMO_PATH + "*_grid_T.nc"))[0]
 
 # Load leverman masks (Maybe in future should just be replaces with coordinates)
 DRIVER = str(sys.argv[5])

@@ -11,6 +11,7 @@ module load netcdf4-parallel/4.7.4
 # 2. Export correct paths to python
 export PYTHONPATH=`pwd`
 export LD_LIBRARY_PATH=$HDF5_PARALLEL_DIR/lib:$PYTHON3_DIR/lib:$LD_LIBRARY_PATH
+#source venv/bin/activate
 
 # 3. Define names and paths needed
 ### experiment name and variables

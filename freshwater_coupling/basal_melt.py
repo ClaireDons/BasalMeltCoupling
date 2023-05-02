@@ -139,7 +139,6 @@ class OceanData:
         lev_ind_bottom = self.nearest_above(lev_bnds[:, 1], bottom)
         lev_ind_top = self.nearest_below(lev_bnds[:, 0], top)
         levs_slice = thetao_ds.isel(lev=slice(lev_ind_top, lev_ind_bottom + 1))
-
         # Create weights for each oceanic layer, correcting for layers
         # that fall only partly within specified depth range
         lev_bnds_sel = lev_bnds.values[lev_ind_top : lev_ind_bottom + 1]
@@ -151,11 +150,9 @@ class OceanData:
         levs_weights_da = xr.DataArray(
             levs_weights, coords={"lev": levs_slice.lev}, dims=["lev"]
         )
-
         # Compute depth weighted mean of ocean slice
-        levs_slice_weighted = levs_slice.weighted(levs_weights_da)
+        levs_slice_weighted = levs_slice.weighted(levs_weights_da.fillna(0))
         levs_weighted_mean = levs_slice_weighted.mean(("lev"))
-
         # Return layer-weighted ocean temperature
         return levs_weighted_mean
 
@@ -169,7 +166,6 @@ class OceanData:
 
         shelf_depth = self.find_shelf_depth[sector]
         ocean_slice = np.array([shelf_depth - 50, shelf_depth + 50])
-
         return ocean_slice
 
     def select_depth_range(self, sector):
@@ -217,27 +213,27 @@ class OceanData:
                 "olevel": "lev",
             }
         )
-        ds_year = thetao_ds.groupby("time_counter.year").mean(
-            "time_counter"
-        )  # Compute annual mean
-        masks = levermann().sector_masks(thetao_ds)
-
+        ds_thetao_year = thetao_ds["thetao"].mean("time_counter")  # Compute annual mean
+        ds_lev_bnds = thetao_ds["olevel_bounds"]
+        masks = levermann().sector_masks(area_ds)
+        vwm_vals = []
+        sects = []
         # Loop over oceanic sectors
         mean_df = pd.DataFrame()
         for sector in self.sectors:
             mask = masks[sector]
-            ds_sel = ds_year["thetao"].where(mask)
-            ds_lev_bnds = ds_year.olevel_bounds.mean("year").copy()
-            # ds_lev_bnds = ds_year.lev_bnds.mean("year").copy()
+            ds_sel = ds_thetao_year.where(mask)
             thetao_awm = self.area_weighted_mean(ds_sel, area_ds)
-            print(thetao_awm)
             thetao_vwm = self.sector_lev_mean(thetao_awm, ds_lev_bnds, sector)
-            print(thetao_vwm)
-            mean_df[sector] = thetao_vwm
+            vwm = float(thetao_vwm.values)
+            vwm_vals.append(vwm)
+            sects.append(sector)
 
-        ds_year.close()
+        ds_thetao_year.close()
         area_ds.close()
-        print("ocean T: ", mean_df)
+        mean_df = pd.DataFrame(columns=self.sectors)
+        series = pd.Series(vwm_vals, index=mean_df.columns)
+        mean_df = mean_df.append(series, ignore_index=True)
         return mean_df
 
 
@@ -332,9 +328,7 @@ class BasalMelt(OceanData):
         basalmelt_df = pd.DataFrame()
         for column in wmean_df:
             thetao = wmean_df[column].values
-            print("ocean T: ", thetao)
             base = self.baseline.get(column)
-            print("base: ", base)
             delta_basalmelt = self.basal_melt_anomalies(thetao, base)
             basalmelt_df[column] = delta_basalmelt
         assert basalmelt_df.empty is False, "Dataframe should not be empty"

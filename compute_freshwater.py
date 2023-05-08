@@ -8,7 +8,6 @@ BISICLES flatten tool.
 Requires the Freshwater modules and glob
 """
 
-import os
 import sys
 from glob import iglob
 from freshwater_coupling import freshwater as FW
@@ -17,15 +16,15 @@ from freshwater_coupling import freshwater as FW
 EXP_NAME = str(sys.argv[1])
 
 # Define paths
-PATH = os.path.dirname(os.path.realpath(__file__))
-SCRATCH = str(sys.argv[2]) + "/"
+PATH = str(sys.argv[2]) + "/BasalMeltCoupling"
+MASK_PATH = PATH + "/inputs/levermann_masks/"
 FLATTEN = str(sys.argv[3])
 
 
-MASK_PATH = PATH + "/inputs/levermann_masks/"
-NC_OUT = SCRATCH + EXP_NAME + "/plots/nc/"
-PLOT_PATH = SCRATCH + EXP_NAME + "/plots/hdf5/"
-CSV_OUT = SCRATCH + EXP_NAME + "/csv/"
+OUTPATH = str(sys.argv[4]) + "/"
+NC_OUT = OUTPATH + "/plots/nc/"
+PLOT_PATH = OUTPATH + "/plots/hdf5/"
+CSV_OUT = OUTPATH + "/csv/"
 
 if __name__ == "__main__":
     PENULTIMATE_FILE = sorted(iglob(PLOT_PATH + "*.2d.hdf5"), reverse=True)[1]

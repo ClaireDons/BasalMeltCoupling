@@ -9,6 +9,12 @@ module load openmpi/4.1.1.1
 module load hdf5-parallel/1.10.6
 module load netcdf4-parallel/4.7.4
 
+# Variables passed on from EC-Earth
+leg_number=$1
+exp_name=$2
+start_dir=$3
+run_dir=$4 
+
 source $start_dir/BasalMeltCoupling/venv/bin/activate
 pip3 install -r $start_dir/BasalMeltCoupling/requirements.txt
 
@@ -21,12 +27,6 @@ export LD_LIBRARY_PATH=$HDF5_PARALLEL_DIR/lib:$PYTHON3_DIR/lib:$LD_LIBRARY_PATH
 gamma=0.05
 bm_name=basal_melt
 bm_file=$bm_name.2d.hdf5
-
-# Variables passed on from EC-Earth
-leg_number=$1
-exp_name=$2
-start_dir=$3
-run_dir=$4 
 
 echo "leg number: $leg_number, exp_name: $exp_name, start_dir: $start_dir, run_dir: $run_dir"
 
@@ -86,7 +86,7 @@ echo "...BISICLES done!"
 if test -n "$(find $plots -type f -name "plot.$exp_name.??????.2d.hdf5" -print -quit)"
     then
     echo "Found plot, calculating freshwater"
-    python3 $start_dir/BasalMeltCoupling/compute_freshwater.py $exp_name $scratch_path $FLATTEN ${num} || exit
+    python3 $start_dir/BasalMeltCoupling/compute_freshwater.py $exp_name $start_dir $FLATTEN $outpath ${num} || exit
     else
     echo "Something went wrong, no plot"
     exit 

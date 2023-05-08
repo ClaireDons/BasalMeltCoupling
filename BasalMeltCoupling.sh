@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 # 1. Load relevant modules
 module load prgenv/gnu
@@ -49,7 +50,7 @@ pip3 install -r $start_dir/BasalMeltCoupling/requirements.txt
 ### 4. Run basal melt python script    
 python3 $start_dir/BasalMeltCoupling/compute_basalmelt.py $exp_name $gamma $bm_name $start_dir $outpath $nemo_output $NC2AMR ${num} || exit
 
-### 5. Define new basal melt values in input files /// Currently if this fails then the script still keeps running, build test in. 
+### 5. Define new basal melt values in input files 
 COUPLED_TEMPLATE="$start_dir/BasalMeltCoupling/BISICLES_submission_template.slurm"
 export COUPLED=$start_dir/BasalMeltCoupling/BISICLES_submission.slurm
 cp $COUPLED_TEMPLATE $COUPLED

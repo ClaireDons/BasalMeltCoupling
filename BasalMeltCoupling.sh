@@ -3,11 +3,14 @@ set -e
 
 # 1. Load relevant modules
 module load prgenv/gnu
-#module load python3/3.8.8-01
+module load python3/3.8.8-01
 module load gcc/11.2.0
 module load openmpi/4.1.1.1
 module load hdf5-parallel/1.10.6
 module load netcdf4-parallel/4.7.4
+
+source $start_dir/BasalMeltCoupling/venv/bin/activate
+pip3 install -r $start_dir/BasalMeltCoupling/requirements.txt
 
 # 2. Export correct paths to python
 export PYTHONPATH=`pwd`
@@ -43,10 +46,6 @@ FLATTEN="$BISICLES_HOME/code/filetools/flatten2d.Linux.64.mpiCC.mpif90.DEBUG.OPT
 NC2AMR="$BISICLES_HOME/code/filetools/nctoamr2d.Linux.64.mpiCC.mpif90.DEBUG.OPT.MPI.PETSC.ex"
 DRIVER="$BISICLES_HOME/code/exec2D/driver2d.Linux.64.mpiCC.mpif90.DEBUG.OPT.MPI.PETSC.ex"
 
-module load python3
-source $start_dir/BasalMeltCoupling/venv/bin/activate
-pip3 install -r $start_dir/BasalMeltCoupling/requirements.txt
-
 ### 4. Run basal melt python script    
 python3 $start_dir/BasalMeltCoupling/compute_basalmelt.py $exp_name $gamma $bm_name $start_dir $outpath $nemo_output $NC2AMR ${num} || exit
 
@@ -60,6 +59,7 @@ sed -i s+@exp+$exp_name+ $COUPLED
 sed -i s+@out+$outpath+ $COUPLED
 sed -i s+@driver+$DRIVER+ $COUPLED
 sed -i s+@bisi+$BISI_INPUT+ $COUPLED
+sed -i s+@sdir+$start_dir+ $COUPLED
 
 # 6. Get job id and wait for BISICLES to finish running
 jid=$(sbatch $start_dir/BasalMeltCoupling/BISICLES_submission.slurm| cut -d ' ' -f4)

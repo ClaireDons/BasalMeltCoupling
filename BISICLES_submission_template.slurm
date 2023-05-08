@@ -13,11 +13,13 @@ module load openmpi/4.1.1.1
 module load hdf5-parallel/1.10.6
 module load netcdf4-parallel/4.7.4
 
+start_dir=@sdir
+
 # Define driver 
 export DRIVER=@driver
 # Define input files
-export INFILEBASE="inputs.ECEbasal"
-export INFILE=inputs.ECEbasal.$SLURM_JOBID
+export INFILEBASE="$start_dir/BasalMeltCoupling/inputs.ECEbasal"
+export INFILE=$start_dir/BasalMeltCoupling/inputs.ECEbasal.$SLURM_JOBID
 echo "INFILE = $INFILE"
 cp $INFILEBASE $INFILE
 
@@ -67,5 +69,5 @@ export CH_OUTPUT_INTERVAL=0
 
 echo "Calculating timestep $count"
 
-srun $DRIVER $INFILE > pout.0 2>err.0
-touch $SLURM_JOBID.txt
+srun $DRIVER $INFILE > $start_dir/BasalMeltCoupling/pout.0 2>$start_dir/BasalMeltCoupling/err.0
+touch $start_dir/BasalMeltCoupling/$SLURM_JOBID.txt

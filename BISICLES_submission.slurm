@@ -21,9 +21,9 @@ export INFILE=inputs.ECEbasal.$SLURM_JOBID
 echo "INFILE = $INFILE"
 cp $INFILEBASE $INFILE
 
-expname=COUPLING_TEST
+expname=TST2
 bisi_input=/scratch/nlcd/bisicles_setup
-outpath=/scratch/nlcd/COUPLING_TEST
+outpath=/ec/res4/scratch/nlcd/r9469-cmip6-bisi-knmi/TST2/output/bisicles
 checkpoints=$outpath/checkpoints
 plots=$outpath/plots/hdf5
 bm=$outpath/basal_melt.2d.hdf5

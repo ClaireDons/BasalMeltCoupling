@@ -20,6 +20,11 @@ PATH = str(sys.argv[2]) + "/BasalMeltCoupling"
 MASK_PATH = PATH + "/inputs/levermann_masks/"
 FLATTEN = str(sys.argv[3])
 
+AREA_FILE = (
+    PATH + "/inputs/ec-earth_data/areacello_Ofx_EC-Earth3_historical_r1i1p1f1_gn.nc"
+)
+
+DISTIBUTION_FILE = PATH + "/inputs/ec-earth_data/FriverDistributionMask_AIS_ORCA1.nc"
 
 OUTPATH = str(sys.argv[4]) + "/"
 NC_OUT = OUTPATH + "/plots/nc/"
@@ -38,3 +43,9 @@ if __name__ == "__main__":
     BASAL.to_csv(CSV_OUT + "basal.csv", index=False)
     print(DISCHARGE)
     print(BASAL)
+
+    # Write to file  (to be read in by EC-Earth in the next year)
+    #if os.path.isfile(file_forcing):
+    #    os.remove(file_forcing)
+
+    #ds_fwf.to_netcdf(file_forcing, unlimited_dims=["time_counter"])

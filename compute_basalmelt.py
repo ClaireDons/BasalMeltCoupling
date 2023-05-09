@@ -34,9 +34,7 @@ AREA_FILE = (
 )
 
 NEMO_PATH = str(sys.argv[6])
-print(NEMO_PATH)
 THETAO_FILE = sorted(iglob(NEMO_PATH + "*_grid_T.nc"))[0]
-print(THETAO_FILE)
 
 # Load leverman masks (Maybe in future should just be replaces with coordinates)
 DRIVER = str(sys.argv[7])

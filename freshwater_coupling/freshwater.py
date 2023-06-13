@@ -85,8 +85,8 @@ class Freshwater:
             Calving discharge for one region (float)
         """
         div_h = vol2 - vol1
-        div_vol = div_h * self.area
-        calving_flux = (smb + bmb - div_vol) / (10**9)
+        div_vol = div_h / 1 # Divide by difference in time 
+        calving_flux = ((smb + bmb - div_vol) / (10**9)) * (917.0 / 1000)
         return calving_flux
 
     def basal_melt(self, bmb):
@@ -97,7 +97,7 @@ class Freshwater:
             basal melt in gigatonnes (float)
         """
         bmb_vol = bmb * self.area
-        bmb_gt = bmb_vol / (10**9)
+        bmb_gt = bmb_vol / (10**9) * (917.0 / 1000)
         return -bmb_gt
 
     def mask_region(self, plot_dat, mask_dat):
@@ -142,10 +142,10 @@ class Freshwater:
         df1 = self.mask_region(dat1, mask_file)
         df2 = self.mask_region(dat2, mask_file)
         calving_flux = self.calving(
-            df2.activeSurfaceThicknessSource,
-            df2.activeBasalThicknessSource,
-            df1.thickness,
-            df2.thickness,
+            df2.activeSurfaceThicknessSource * self.area,
+            df2.activeBasalThicknessSource * self.area,
+            df1.thickness * self.area,
+            df2.thickness * self.area,
         )
         bmb = self.basal_melt(df2.activeBasalThicknessSource)
         return calving_flux, bmb

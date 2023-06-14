@@ -32,7 +32,7 @@ PLOT_PATH = OUTPATH + "/plots/hdf5/"
 CSV_OUT = OUTPATH + "/csv/"
 
 NEMO_PATH = str(sys.argv[5])
-THETAO_FILE = sorted(iglob(NEMO_PATH + "*_grid_T.nc"))[0]
+THETAO_FILE = sorted(iglob(NEMO_PATH + "*_grid_T_3D.nc"))[0]
 
 if __name__ == "__main__":
     PENULTIMATE_FILE = sorted(iglob(PLOT_PATH + "*.2d.hdf5"), reverse=True)[1]

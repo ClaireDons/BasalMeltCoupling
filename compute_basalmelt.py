@@ -52,6 +52,7 @@ if __name__ == "__main__":
     OUTPUT_CSV = new_path(CSV_OUT)
     OUTPUT_CHK = new_path(CHK_OUT)
     OCEAN_TEMP = BM.BasalMelt(THETAO_FILE, AREA_FILE, GAMMA)
-    OCEAN_TEMP.map_basalmelt(MASK_PATH, OUTPATH, DRIVER, NAME)
-
+    BASAL_MELT = OCEAN_TEMP.map_basalmelt(MASK_PATH, OUTPATH, DRIVER, NAME)
+    BM_CSV = OUTPUT_CSV + EXP_NAME + "_bm.csv"
+    BASAL_MELT.to_csv(BM_CSV, mode="a", header=not os.path.exists(BM_CSV))
     print("Basal Melt Calculated")

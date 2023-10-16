@@ -23,9 +23,9 @@ export INFILE=$start_dir/BasalMeltCoupling/inputs.ECEbasal.$SLURM_JOBID
 echo "INFILE = $INFILE"
 cp $INFILEBASE $INFILE
 
-expname=TST2
+expname=B585
 bisi_input=/scratch/nlcd/bisicles_setup
-outpath=/ec/res4/scratch/nlcd/r9469-cmip6-bisi-knmi/TST2/output/bisicles
+outpath=/ec/res4/scratch/nlcd/r9469-cmip6-bisi-knmi/B585/output/bisicles
 checkpoints=$outpath/checkpoints
 plots=$outpath/plots/hdf5
 bm=$outpath/basal_melt.2d.hdf5

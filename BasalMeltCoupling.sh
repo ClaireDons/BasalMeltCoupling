@@ -94,7 +94,7 @@ if test -n "$(find $plots -type f -name "plot.$exp_name.??????.2d.hdf5" -print -
     then
     echo "Found plot, calculating freshwater"
     python3 $start_dir/BasalMeltCoupling/compute_freshwater.py $exp_name $start_dir $FLATTEN $outpath $nemo_output ${num} || exit
-    cp -p $run_dir/output/bisicles/csv/freshwater_forcing.nc $start_dir/BasalMeltCoupling/inputs/forcing/FWF_LRF_y${leg_end_date}.nc
+    cp -p $run_dir/output/bisicles/csv/freshwater_forcing.nc $start_dir/BasalMeltCoupling/inputs/forcing/$exp_name/FWF_LRF_y${leg_end_date}.nc
     else
     echo "Something went wrong, no plot"
     exit 

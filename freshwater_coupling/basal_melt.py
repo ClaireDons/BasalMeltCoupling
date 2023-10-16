@@ -279,9 +279,10 @@ class BasalMelt(OceanData):
         "apen": -0.6192596251283067,
     }
 
+
     def __init__(self, thetao, area, gamma):
         OceanData.__init__(self, thetao, area)
-        self.gamma = gamma
+        self.gamma = gamma * 0.65
 
     def basal_melt_sensitivity(self):
         """Calculate quadratic constant
@@ -330,7 +331,7 @@ class BasalMelt(OceanData):
             thetao = wmean_df[column].values
             base = self.baseline.get(column)
             delta_basalmelt = self.basal_melt_anomalies(thetao, base)
-            basalmelt_df[column] = delta_basalmelt
+            basalmelt_df[column] = -delta_basalmelt
         assert basalmelt_df.empty is False, "Dataframe should not be empty"
         print(basalmelt_df)
         return basalmelt_df

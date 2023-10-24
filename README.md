@@ -7,6 +7,8 @@ For this code to function, you need to be working on a branch of EC-Earth3, whic
 
 The coupling is closely related to the linear response function freshwater coupling, that has been integrated into OptiESM and uses a similar structure and communal code. 
 
+### Work To Do
+
 
 ## Content Table
 1. Installation
@@ -26,6 +28,9 @@ The coupling is closely related to the linear response function freshwater coupl
 
 
 ## 2. How the coupling works
+`BasalMeltCoupling.sh` controls the coupling, most changes when running the code are made here. The code loads all necessary modules and python environment and then runs the basal melt calculation `compute_basalmelt.py`, runs BISICLES, waits for it to finish and then runs the freshwater calculation `compute_freshwater.py`. The script is called at the end of each EC-Earth leg. Once it has finished running the following leg is run. This flowchart below depicts how each bit of code work together. 
+
+
 ![image](https://user-images.githubusercontent.com/82878115/221154886-f0c31171-538b-4a80-a459-ee6af2fa5d31.png)
 
 ## 3. Changes to EC-Earth

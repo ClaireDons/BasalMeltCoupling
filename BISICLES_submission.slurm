@@ -23,9 +23,9 @@ export INFILE=$start_dir/BasalMeltCoupling/inputs.ECEbasal.$SLURM_JOBID
 echo "INFILE = $INFILE"
 cp $INFILEBASE $INFILE
 
-expname=TST2
+expname=B585
 bisi_input=/scratch/nlcd/bisicles_setup
-outpath=/ec/res4/scratch/nlcd/r9469-cmip6-bisi-knmi/TST2/output/bisicles
+outpath=/ec/res4/scratch/nlcd/r9469-cmip6-bisi-knmi/B585/output/bisicles
 checkpoints=$outpath/checkpoints
 plots=$outpath/plots/hdf5
 bm=$outpath/basal_melt.2d.hdf5
@@ -43,16 +43,16 @@ plot_count=$(find $plots/plot.* -maxdepth 1 -type f|wc -l)
 
 if test $count -eq 0
 then
-    let count=count+1
-    sed -i s+@TIME+$count+ $INFILE
+    let plot_count=plot_count+1
+    sed -i s+@TIME+$plot_count+ $INFILE
 else
-    let count=count # Increase by one, for the next file number
-    sed -i s+@TIME+$count+ $INFILE
-    if test $plot_count -ne $count
-    then
-        echo "Number of plots not equal to number of checkpoints, exiting"
-        exit
-    fi
+    let plot_count=plot_count # Increase by one, for the next file number
+    sed -i s+@TIME+$plot_count+ $INFILE
+    #if test $plot_count -ne $count
+    #then
+    #    echo "Number of plots not equal to number of checkpoints, exiting"
+    #    exit
+    #fi
     # If check point is found, get the latest and add it for restart
     echo "Checkpoint found"
     LCHK=`ls $checkpoints/chk.$expname.??????.2d.hdf5 | tail -n 1`

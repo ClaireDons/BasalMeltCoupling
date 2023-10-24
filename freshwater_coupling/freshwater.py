@@ -85,8 +85,8 @@ class Freshwater:
             Calving discharge for one region (float)
         """
         div_h = vol2 - vol1
-        div_vol = div_h * self.area
-        calving_flux = (smb + bmb - div_vol) / (10**9)
+        div_vol = div_h / 1 # Divide by difference in time 
+        calving_flux = ((smb + bmb - div_vol) / (10**9)) * (917.0 / 1000)
         return calving_flux
 
     def basal_melt(self, bmb):
@@ -97,7 +97,7 @@ class Freshwater:
             basal melt in gigatonnes (float)
         """
         bmb_vol = bmb * self.area
-        bmb_gt = bmb_vol / (10**9)
+        bmb_gt = bmb_vol / (10**9) * (917.0 / 1000)
         return -bmb_gt
 
     def mask_region(self, plot_dat, mask_dat):
@@ -142,10 +142,10 @@ class Freshwater:
         df1 = self.mask_region(dat1, mask_file)
         df2 = self.mask_region(dat2, mask_file)
         calving_flux = self.calving(
-            df2.activeSurfaceThicknessSource,
-            df2.activeBasalThicknessSource,
-            df1.thickness,
-            df2.thickness,
+            df2.activeSurfaceThicknessSource * self.area,
+            df2.activeBasalThicknessSource * self.area,
+            df1.thickness * self.area,
+            df2.thickness * self.area,
         )
         bmb = self.basal_melt(df2.activeBasalThicknessSource)
         return calving_flux, bmb
@@ -179,27 +179,31 @@ class Freshwater:
         flux = fwf_df.values * self.kg_per_Gt / self.spy / float(distribution_area)
         # Apply flux to masked region
         fwforcing = flux * distribution_mask
-        fwforcing = fwforcing.rename({"friver": "freshwater_flux"})
+        #fwforcing = fwforcing.rename({"friver": "freshwater_flux"})
         return fwforcing
 
     def oceangrid_distribution(
-        self, basal_df, discharge_df, file_area, file_distribution_mask
+        self, discharge_df, basal_df, file_area, file_basal_melt_mask, file_calving_mask
     ):
         """Distribute freshwater input over ocean grid"""
 
-        distribution_mask = xr.open_dataset(file_distribution_mask)
+        basal_melt_mask = xr.open_dataset(file_basal_melt_mask)
+        calving_mask = xr.open_dataset(file_calving_mask)
+
         ds_area = xr.open_dataset(file_area)
-        distribution_area = (
-            ds_area.areacello.where(distribution_mask.friver).sum("j").sum("i").values
-        )
-        print("Freshwater distribution area: ", distribution_area, "m^2")
+        basal_melt_area = ds_area.areacello.where(basal_melt_mask.basal_melt_mask).sum('j').sum('i').values
+        calving_area = ds_area.areacello.where(calving_mask.calving_mask).sum('j').sum('i').values
 
         fwf_calving = self.areaflux_calculation(
-            discharge_df, distribution_area, distribution_mask
+            discharge_df, calving_area, calving_mask
         )
         fwf_basal = self.areaflux_calculation(
-            basal_df, distribution_area, distribution_mask
+            basal_df, basal_melt_area, basal_melt_mask
         )
+
+        fwf_basal = fwf_basal.rename({'basal_melt_mask':'sorunoff_f'})
+        fwf_calving = fwf_calving.rename({'calving_mask':'socalving_f'})
+
         return fwf_calving, fwf_basal
 
     def create_time_dimension(self, file_thetao):
@@ -211,8 +215,8 @@ class Freshwater:
 
     def create_fwf_dataarray(self, time_attr, attr_fwfname, fwfvar):
         """Create a dataarray from freshwater forcing"""
-        fwfvar = fwfvar.rename({"freshwater_flux": attr_fwfname})
-        fwfvar = fwfvar.socalving_f.expand_dims({"time_counter": time_attr.values})
+        #fwfvar = fwfvar.rename({"freshwater_flux": attr_fwfname})
+        fwfvar = fwfvar[attr_fwfname].expand_dims({"time_counter": time_attr.values})
         fwfvar.attrs = {"long_name": attr_fwfname + "flux", "units": "kg/m^2/s"}
         fwfvar = fwfvar.fillna(0)  # set nans to zeros
         return fwfvar
@@ -227,4 +231,17 @@ class Freshwater:
         # Merge dataarrays in one dataset
         ds_fwf = xr.merge([fwf_basalda, fwf_calvingda])
         ds_fwf = ds_fwf.assign_coords({"time_counter": time_attr.values})
+        return ds_fwf
+
+    def calculate_nemo_forcing(
+        self, discharge_df, basal_df, file_area, file_basal_melt_mask, file_calving_mask, file_thetao
+    ):
+        """Calculate the freshwater distibution for NEMO based on dataframes of basal melt and calving"""
+        sum_calving = discharge_df.sum(axis=1)
+        sum_basal = basal_df.sum(axis=1)
+        print(sum_calving, sum_basal)
+        fwf_calving, fwf_basal = self.oceangrid_distribution(
+            sum_calving, sum_basal, file_area, file_basal_melt_mask, file_calving_mask
+        )
+        ds_fwf = self.create_nemo_forcing(fwf_calving, fwf_basal, file_thetao)
         return ds_fwf

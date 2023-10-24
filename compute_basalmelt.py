@@ -34,9 +34,7 @@ AREA_FILE = (
 )
 
 NEMO_PATH = str(sys.argv[6])
-print(NEMO_PATH)
-THETAO_FILE = sorted(iglob(NEMO_PATH + "*_grid_T.nc"))[0]
-print(THETAO_FILE)
+THETAO_FILE = sorted(iglob(NEMO_PATH + "*_grid_T_3D.nc"))[0]
 
 # Load leverman masks (Maybe in future should just be replaces with coordinates)
 DRIVER = str(sys.argv[7])
@@ -54,6 +52,7 @@ if __name__ == "__main__":
     OUTPUT_CSV = new_path(CSV_OUT)
     OUTPUT_CHK = new_path(CHK_OUT)
     OCEAN_TEMP = BM.BasalMelt(THETAO_FILE, AREA_FILE, GAMMA)
-    OCEAN_TEMP.map_basalmelt(MASK_PATH, OUTPATH, DRIVER, NAME)
-
+    BASAL_MELT = OCEAN_TEMP.map_basalmelt(MASK_PATH, OUTPATH, DRIVER, NAME)
+    BM_CSV = OUTPUT_CSV + EXP_NAME + "_bm.csv"
+    BASAL_MELT.to_csv(BM_CSV, mode="a", header=not os.path.exists(BM_CSV))
     print("Basal Melt Calculated")

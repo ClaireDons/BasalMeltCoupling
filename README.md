@@ -21,6 +21,8 @@ The coupling is closely related to the linear response function freshwater coupl
 ### Pre-requisites
 - Correct branch of EC-Earth or make your own changes
 - BISICLES compiled
+- BISICLES initialised set-up, either BEDMAP2 or BedMachine3.
+- Input files for freshwater calculation (see section 3)
 
 ### Download
 - Clone repository from github or if using BISICLES branch then the code will already be there.
@@ -49,7 +51,6 @@ path: runtimes/classic/
 - ece-esm.sh.tmpl
 - config-run.xml
 - wrapper-hpc2020.sh
-- fwfwrapper.sh                 - calls python scripts from ece-esm.sh.tmpl             -
 - /ctrl/namelist.nemo-ORCA1L75-coupled.cfg.sh 
 
 ### Input files

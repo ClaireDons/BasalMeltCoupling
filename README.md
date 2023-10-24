@@ -3,19 +3,29 @@
 
 This repository contains the code for the freshwater coupling between BISICLES and EC-Earth3. 
 
-For this code to function, you need to be working on a branch of EC-Earth3, which contains some changes for the freshwater distribution as well as an option for the BISICLES coupling. This can be found, along with this code, on the svn branch `branch name`. You also need to have BISICLES compiled somewhere on your system, instruction on how to do this can be found [here](https://davis.lbl.gov/Manuals/BISICLES-DOCS/readme.html), more specific ECMWF instructions can be found [here](https://github.com/BISICLES-users/BISICLES-notes/blob/main/BISICLES_ECMWF2020.md). 
+For this code to function, you need to be working on a branch of EC-Earth3, which contains some changes for the freshwater distribution as well as an option for the BISICLES coupling. This can be found, along with this code, on the svn branch `branch name`. You also need to have BISICLES compiled somewhere on your system, instruction on how to do this can be found [here](https://davis.lbl.gov/Manuals/BISICLES-DOCS/readme.html), more specific ECMWF instructions can be found [here](https://github.com/BISICLES-users/BISICLES-notes/blob/main/BISICLES_ECMWF2020.md). A brief overview of changes that were made to EC-Earth are also outlined in this document. 
 
-This repository contains the following: 
+## Content Table
+1. Installation
+2. How the coupling works
+3. Changes to EC-Earth
+4. Running EC-Earth with freshwater coupled
 
-=======
-Scripts for basal melt / Freshwater coupling of BISICLES to EC-Earth
-Additional changes and scripts are needed within EC-Earth
+## 1. Installation
+
+### Pre-requisites
+- Correct branch of EC-Earth or make your own changes
+- BISICLES compiled
+
+### Download
+- Clone repository from github or if using BISICLES branch then the code will already be there.
 
 
-## Coupling scripts
+
+## 2. How the coupling works
 ![image](https://user-images.githubusercontent.com/82878115/221154886-f0c31171-538b-4a80-a459-ee6af2fa5d31.png)
 
-## EC-Earth Changes
+## 3. Changes to EC-Earth
 
 ## NEMO files (compile nemo after these changes)
 path: sources/nemo-3.6/CONFIG/ORCA1L75_LIM3/MY_SRC/
@@ -63,4 +73,4 @@ Monitoring
 - CumulativeFreshwaterForcingAnomaly_{exp}_{year_min}_{year_max}.csv
 - TotalFreshwaterForcing_{exp}_{year_min}_{year_max}.csv - sum of anomalies + baseline
 
-## BISICLES
+## 4. Running EC-Earth with freshwater coupled

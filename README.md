@@ -3,18 +3,20 @@
 
 This repository contains the code for the freshwater coupling between BISICLES and EC-Earth3. 
 
-For this code to function, you need to be working on a branch of EC-Earth3, which contains some changes for the freshwater distribution as well as an option for the BISICLES coupling. This can be found, along with this code, on the svn branch `branch name`. You also need to have BISICLES compiled somewhere on your system, instruction on how to do this can be found [here](https://davis.lbl.gov/Manuals/BISICLES-DOCS/readme.html), more specific ECMWF instructions can be found [here](https://github.com/BISICLES-users/BISICLES-notes/blob/main/BISICLES_ECMWF2020.md). A brief overview of changes that were made to EC-Earth are also outlined in this document. 
+For this code to function, you need to be working on a branch of EC-Earth3, which contains some changes for the freshwater distribution as well as an option for the BISICLES coupling. This can be found, along with this code, on the svn branch `r9469-cmip6-bisi-knmi`. You also need to have BISICLES compiled somewhere on your system, instruction on how to do this can be found [here](https://davis.lbl.gov/Manuals/BISICLES-DOCS/readme.html), more specific ECMWF instructions can be found [here](https://github.com/BISICLES-users/BISICLES-notes/blob/main/BISICLES_ECMWF2020.md). A brief overview of changes that were made to EC-Earth are also outlined in this document. 
 
 The coupling is closely related to the linear response function freshwater coupling, that has been integrated into OptiESM and uses a similar structure and communal code. 
 
-### Work To Do
-
+### Work To Do & current issues
+- BISICLES is currently not compiled in the svn branch due to compilation issues.
+- Some changes were made to how the freshwater is distributed for Eveline's code, this branch needs to be updated with these changes too.
+- 
 
 ## Content Table
 1. Installation
 2. How the coupling works
-3. Changes to EC-Earth
-4. Running EC-Earth with freshwater coupled
+3. Running EC-Earth with freshwater coupled
+4. Changes to EC-Earth (taken from Eveline's LRF changes)
 
 ## 1. Installation
 
@@ -35,7 +37,26 @@ The coupling is closely related to the linear response function freshwater coupl
 
 ![image](https://user-images.githubusercontent.com/82878115/221154886-f0c31171-538b-4a80-a459-ee6af2fa5d31.png)
 
-## 3. Changes to EC-Earth
+
+## 3. Running EC-Earth with freshwater coupled
+
+- Where are all the files
+
+To run the model with the freshwater coupling turned on. Make sure that `config_run.xml` and `wrapper-hpc2020.sh` use the fwf=5 option and any other information EC-Earth needs as standard (e.g. experiment name, start date etc). 
+The initialised ice sheet model setup is modern day, so it is best to restart EC-Earth from the year 2000 or run BISICLES with 1850 conditions for several years until it stabilises. 
+
+`BasalMeltCoupling.sh` needs to be edited with the following information:
+- Path to compiled BISICLES driver
+- BISICLES driver names
+- Gamma value that you want to use
+- Scratch path
+
+Other files should not need to be edited unless you want to modify functionalities. 
+
+Then you submit an EC-Earth run as normal. The output files from bisicles should be found alongside the output files from nemo and ifs in the scratch directory with the experiment name. The exception to this is the freshwater forcing files that are currently found in perm. 
+
+
+## 4. Changes to EC-Earth
 
 ## NEMO files (compile nemo after these changes)
 path: sources/nemo-3.6/CONFIG/ORCA1L75_LIM3/MY_SRC/
@@ -81,20 +102,3 @@ Monitoring
 - BasalMeltAnomaly_{exp}_{year_min}_{year_max}.csv
 - CumulativeFreshwaterForcingAnomaly_{exp}_{year_min}_{year_max}.csv
 - TotalFreshwaterForcing_{exp}_{year_min}_{year_max}.csv - sum of anomalies + baseline
-
-## 4. Running EC-Earth with freshwater coupled
-
-- Where are all the files
-
-To run the model with the freshwater coupling turned on. Make sure that `config_run.xml` and `wrapper-hpc2020.sh` use the fwf=5 option and any other information EC-Earth needs as standard (e.g. experiment name, start date etc). 
-The initialised ice sheet model setup is modern day, so it is best to restart EC-Earth from the year 2000 or run BISICLES with 1850 conditions for several years until it stabilises. 
-
-`BasalMeltCoupling.sh` needs to be edited with the following information:
-- Path to compiled BISICLES driver
-- BISICLES driver names
-- Gamma value that you want to use
-- Scratch path
-
-Other files should not need to be edited unless you want to modify functionalities. 
-
-Then you submit an EC-Earth run as normal. The output files from bisicles should be found alongside the output files from nemo and ifs in the scratch directory with the experiment name. The exception to this is the freshwater forcing files that are currently found in perm. 

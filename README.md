@@ -93,6 +93,7 @@ The initialised ice sheet model setup is modern day, so it is best to restart EC
 - Path to compiled BISICLES driver
 - BISICLES driver names
 - Gamma value that you want to use
+- Scratch path
 
 Other files should not need to be edited unless you want to modify functionalities. 
 

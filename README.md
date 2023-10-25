@@ -10,7 +10,7 @@ The coupling is closely related to the linear response function freshwater coupl
 ### Work To Do & current issues
 - BISICLES is currently not compiled in the svn branch due to compilation issues.
 - Some changes were made to how the freshwater is distributed for Eveline's code, this branch needs to be updated with these changes too.
-- 
+- How the location of input files is defined in `compute_basalmelt.py` rather than `BasalMeltCoupling.sh` is inconvenient and should be changed 
 
 ## Content Table
 1. Installation
@@ -43,11 +43,25 @@ The coupling is closely related to the linear response function freshwater coupl
 To run the model with the freshwater coupling turned on. Make sure that `config_run.xml` and `wrapper-hpc2020.sh` use the fwf=5 option and any other information EC-Earth needs as standard (e.g. experiment name, start date etc). 
 The initialised ice sheet model setup is modern day, so it is best to restart EC-Earth from the year 2000 or run BISICLES with 1850 conditions for several years until it stabilises. 
 
+Copy or create a directory with the bisicles input data in your scratch directory. 
+
+!! Due to the file system used in perm and home, the data cannot be read from there and you need to read it from scratch. You can keep a permanent copy in perm or home, but you will get an error if running from there !! 
+
+Within the BasalMeltCoupling directory, create or copy an "inputs" directory, which then contains directories of the following:
+- "ec-earth_data": same input as for fwf lrf functions (see section 4)
+- "forcing": where fwf files are output, 1st year file needs to be present before running ec-earth
+- "levermann_masks": region masks for BISICLES (in hdf5 format)
+
+These can be put elsewhere but then you need to make sure the code points to them correctly. This would require editing `compute_basalmelt.py` where this is defined. 
+
 `BasalMeltCoupling.sh` needs to be edited with the following information:
 - Path to compiled BISICLES driver
 - BISICLES driver names
 - Gamma value that you want to use
 - Scratch path
+- Location of bisicles input data
+
+- Optionally, you can change the paths in the "paths" section, if you have a different setup
 
 Other files should not need to be edited unless you want to modify functionalities. 
 

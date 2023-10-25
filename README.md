@@ -10,7 +10,8 @@ The coupling is closely related to the linear response function freshwater coupl
 ### Work To Do & current issues
 - BISICLES is currently not compiled in the svn branch due to compilation issues.
 - Some changes were made to how the freshwater is distributed for Eveline's code, this branch needs to be updated with these changes too.
-- How the location of input files is defined in `compute_basalmelt.py` rather than `BasalMeltCoupling.sh` is inconvenient and should be changed 
+- How the location of input files is defined in `compute_basalmelt.py` rather than `BasalMeltCoupling.sh` is inconvenient and should be changed
+- Note that OptiESM may have taken over option fwf=5 for something else, so it may need to be updated to fwf=6
 
 ## Content Table
 1. Installation
@@ -40,7 +41,7 @@ The coupling is closely related to the linear response function freshwater coupl
 
 ## 3. Running EC-Earth with freshwater coupled
 
-To run the model with the freshwater coupling turned on. Make sure that `config_run.xml` and `wrapper-hpc2020.sh` use the fwf=5 option and any other information EC-Earth needs as standard (e.g. experiment name, start date etc). 
+To run the model with the freshwater coupling turned on. Make sure that `config_run.xml` is set to use the fwf=5 option and any other information EC-Earth needs as standard (e.g. experiment name, start date etc). 
 The initialised ice sheet model setup is modern day, so it is best to restart EC-Earth from the year 2000 or run BISICLES with 1850 conditions for several years until it stabilises. 
 
 Copy or create a directory with the bisicles input data in your scratch directory. 
@@ -65,7 +66,9 @@ These can be put elsewhere but then you need to make sure the code points to the
 
 Other files should not need to be edited unless you want to modify functionalities. 
 
-Then you submit an EC-Earth run as normal. The output files from bisicles should be found alongside the output files from nemo and ifs in the scratch directory with the experiment name. The exception to this is the freshwater forcing files that are currently found in perm. 
+Edit the `wrapper-hpc2020.sh` so that `fwf=5`, then you can run ec-earth by running `wrapper-hpc2020.sh` 
+
+The output files from bisicles should be found alongside the output files from nemo and ifs in the scratch directory with the experiment name. The exception to this is the freshwater forcing files that are currently found in perm. 
 
 
 ## 4. Changes to EC-Earth

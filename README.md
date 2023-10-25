@@ -27,7 +27,7 @@ The coupling is closely related to the linear response function freshwater coupl
 ### Download
 - Clone repository from github or if using BISICLES branch then the code will already be there.
 
-
+- What the file structure looks like 
 
 ## 2. How the coupling works
 `BasalMeltCoupling.sh` controls the coupling, most changes when running the code are made here. The code loads all necessary modules and python environment and then runs the basal melt calculation `compute_basalmelt.py`, runs BISICLES, waits for it to finish and then runs the freshwater calculation `compute_freshwater.py`. The script is called at the end of each EC-Earth leg. Once it has finished running the following leg is run. This flowchart below depicts how each bit of code work together. 

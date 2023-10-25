@@ -83,3 +83,17 @@ Monitoring
 - TotalFreshwaterForcing_{exp}_{year_min}_{year_max}.csv - sum of anomalies + baseline
 
 ## 4. Running EC-Earth with freshwater coupled
+
+- Where are all the files
+
+To run the model with the freshwater coupling turned on. Make sure that `config_run.xml` and `wrapper-hpc2020.sh` use the fwf=5 option and any other information EC-Earth needs as standard (e.g. experiment name, start date etc). 
+The initialised ice sheet model setup is modern day, so it is best to restart EC-Earth from the year 2000 or run BISICLES with 1850 conditions for several years until it stabilises. 
+
+`BasalMeltCoupling.sh` needs to be edited with the following information:
+- Path to compiled BISICLES driver
+- BISICLES driver names
+- Gamma value that you want to use
+
+Other files should not need to be edited unless you want to modify functionalities. 
+
+Then you submit an EC-Earth run as normal. The output files from bisicles should be found alongside the output files from nemo and ifs in the scratch directory with the experiment name. The exception to this is the freshwater forcing files that are currently found in perm. 

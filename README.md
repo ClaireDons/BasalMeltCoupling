@@ -40,8 +40,6 @@ The coupling is closely related to the linear response function freshwater coupl
 
 ## 3. Running EC-Earth with freshwater coupled
 
-- Where are all the files
-
 To run the model with the freshwater coupling turned on. Make sure that `config_run.xml` and `wrapper-hpc2020.sh` use the fwf=5 option and any other information EC-Earth needs as standard (e.g. experiment name, start date etc). 
 The initialised ice sheet model setup is modern day, so it is best to restart EC-Earth from the year 2000 or run BISICLES with 1850 conditions for several years until it stabilises. 
 
